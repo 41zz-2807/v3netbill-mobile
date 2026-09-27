@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/utils/formatters.dart';
+import '../../../shared/widgets/account_create_sheet.dart';
 import '../../../shared/widgets/common.dart';
 import '../models/account.dart';
 import '../providers/accounts_provider.dart';
@@ -186,99 +187,15 @@ class _AccountsPageState extends State<AccountsPage>
     BuildContext context,
     AccountsProvider p,
   ) async {
-    final isVoucher = p.tab == AccountType.voucher;
-    final namaCtrl = TextEditingController();
-    final sandiCtrl = TextEditingController();
-    final nominalCtrl = TextEditingController(text: '10000');
+    final draft = await showAccountCreateSheet(context, tipe: p.tab);
+    if (draft == null || !context.mounted) return;
 
-    final submit = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Buat ${isVoucher ? 'Voucher' : 'Member'} Baru',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Nominal harus kelipatan 500.',
-              style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-            ),
-            const SizedBox(height: 20),
-            if (!isVoucher) ...[
-              TextField(
-                controller: namaCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Nama member',
-                  prefixIcon: Icon(Icons.person_outline, size: 20),
-                ),
-              ),
-              const SizedBox(height: 14),
-            ],
-            if (!isVoucher) ...[
-              const SizedBox(height: 14),
-              TextField(
-                controller: sandiCtrl,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Password member',
-                  hintText: 'Minimal 4 angka',
-                  prefixIcon: Icon(Icons.lock_outline, size: 20),
-                ),
-              ),
-            ],
-            const SizedBox(height: 14),
-            TextField(
-              controller: nominalCtrl,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                labelText: isVoucher ? 'Nominal voucher' : 'Saldo awal',
-                prefixIcon: const Icon(Icons.payments_outlined, size: 20),
-                suffixText: 'Rp',
-              ),
-            ),
-            const SizedBox(height: 22),
-            ElevatedButton(
-              onPressed: () {
-                if (nominalCtrl.text.trim().isEmpty) return;
-                if (!isVoucher && namaCtrl.text.trim().isEmpty) return;
-                if (!isVoucher && sandiCtrl.text.length < 4) return;
-                Navigator.pop(ctx, true);
-              },
-              child: const Text('Simpan'),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (submit != true || !context.mounted) return;
-
-    final nominal = int.tryParse(nominalCtrl.text.trim()) ?? 0;
-    final ok = isVoucher
-        ? await p.createVoucher(nominal)
+    final ok = p.tab == AccountType.voucher
+        ? await p.createVoucher(draft.nominal)
         : await p.createMember(
-            nama: namaCtrl.text.trim(),
-            password: sandiCtrl.text.trim(),
-            nominal: nominal,
+            nama: draft.nama,
+            password: draft.password,
+            nominal: draft.nominal,
           );
 
     if (!context.mounted) return;

@@ -99,6 +99,46 @@ class AccountsProvider extends ChangeNotifier {
         'Gagal membuat voucher.',
       );
 
+  /// Membuat voucher lalu mengembalikan objek barunya, bukan hanya status.
+  ///
+  /// Dipakai dialog "Mulai Sesi": begitu akun baru dibuat, kodenya langsung
+  /// dipakai untuk memulai sesi, jadi pemanggil wajib menerima kode barunya.
+  /// Mengembalikan null kalau gagal, dan alasannya ada di [error].
+  Future<Account?> createVoucherDapatKode(int nominal) => _createAndReturn(
+        () => _repo.createVoucher(nominal: nominal),
+      );
+
+  /// Sama seperti [createVoucherDapatKode], tapi untuk member.
+  Future<Account?> createMemberDapatKode({
+    required String nama,
+    required String password,
+    required int nominal,
+  }) =>
+      _createAndReturn(
+        () => _repo.createMember(
+          nama: nama,
+          password: password,
+          nominal: nominal,
+        ),
+      );
+
+  Future<Account?> _createAndReturn(Future<Account> Function() action) async {
+    _error = null;
+    try {
+      final account = await action();
+      await load(silent: true);
+      return account;
+    } on ApiException catch (e) {
+      _error = e.displayMessage;
+      notifyListeners();
+      return null;
+    } catch (e) {
+      _error = 'Gagal membuat akun.';
+      notifyListeners();
+      return null;
+    }
+  }
+
   Future<bool> createMember({
     required String nama,
     required String password,

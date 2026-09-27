@@ -3,9 +3,24 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/utils/formatters.dart';
+import '../../../../shared/widgets/account_create_sheet.dart';
 import '../../../../shared/widgets/common.dart';
+import '../../../accounts/models/account.dart';
+import '../../../accounts/providers/accounts_provider.dart';
 import '../../models/pc.dart';
 import '../../providers/pc_provider.dart';
+
+/// Apa yang dipilih operator di dialog "Mulai Sesi".
+enum _MulaiAksi {
+  /// Pakai kode yang diketik manual.
+  pakaiKode,
+
+  /// Buat voucher baru, lalu pakai kodenya.
+  buatVoucher,
+
+  /// Buat member baru, lalu pakai kodenya.
+  buatMember,
+}
 
 /// Kartu satu PC beserta tombol aksi.
 ///
@@ -180,12 +195,18 @@ class PcCard extends StatelessWidget {
 
   /// Dialog mulai sesi. Backend hanya meminta kode voucher atau member,
   /// tanpa password, karena proses ini dilakukan dari sisi operator.
+  ///
+  /// Kasir sering menemukan PC kosong dengan voucher yang sudah habis atau belum
+  /// dibuat sama sekali. Karena itu dialog ini juga bisa membuat voucher atau
+  /// member baru, lalu memakai kode yang barusan dibuat untuk langsung memulai
+  /// sesi, supaya kasir tidak perlu naik ke halaman akun lalu kembali ke sini.
   Future<void> _startSession(
     BuildContext context,
     PcProvider provider,
   ) async {
     final kodeCtrl = TextEditingController();
-    final submit = await showDialog<bool>(
+
+    final aksi = await showDialog<_MulaiAksi>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Mulai Sesi di ${pc.namaPc}'),
@@ -208,22 +229,57 @@ class PcCard extends StatelessWidget {
                 counterText: '',
               ),
             ),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 8),
+            const Text(
+              'Belum punya kode?',
+              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        Navigator.pop(ctx, _MulaiAksi.buatVoucher),
+                    icon: const Icon(Icons.confirmation_number_outlined,
+                        size: 18),
+                    label: const Text('Voucher'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.pop(ctx, _MulaiAksi.buatMember),
+                    icon: const Icon(Icons.person_outline, size: 18),
+                    label: const Text('Member'),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx, null),
             child: const Text('Batal'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(ctx, _MulaiAksi.pakaiKode),
             child: const Text('Mulai'),
           ),
         ],
       ),
     );
 
-    if (submit != true || !context.mounted) return;
+    if (aksi == null || !context.mounted) return;
+
+    if (aksi == _MulaiAksi.buatVoucher || aksi == _MulaiAksi.buatMember) {
+      await _buatLaluMulai(context, provider, aksi == _MulaiAksi.buatVoucher);
+      return;
+    }
+
     final kode = kodeCtrl.text.trim();
     if (kode.isEmpty) {
       _toast(context, 'Kode wajib diisi.', false);
@@ -232,6 +288,50 @@ class PcCard extends StatelessWidget {
     final err = await provider.startSession(pcId: pc.id, kode: kode);
     if (!context.mounted) return;
     _toast(context, err ?? 'Sesi dimulai di ${pc.namaPc}.', err == null);
+  }
+
+  /// Membuat akun baru, lalu memakai kode barunya untuk memulai sesi.
+  Future<void> _buatLaluMulai(
+    BuildContext context,
+    PcProvider provider,
+    bool voucher,
+  ) async {
+    final tipe = voucher ? AccountType.voucher : AccountType.member;
+    final accounts = context.read<AccountsProvider>();
+
+    final draft = await showAccountCreateSheet(context, tipe: tipe);
+    if (draft == null || !context.mounted) return;
+
+    final akun = voucher
+        ? await accounts.createVoucherDapatKode(draft.nominal)
+        : await accounts.createMemberDapatKode(
+            nama: draft.nama,
+            password: draft.password,
+            nominal: draft.nominal,
+          );
+
+    if (!context.mounted) return;
+    if (akun == null) {
+      _toast(context, accounts.error ?? 'Gagal membuat akun.', false);
+      return;
+    }
+
+    // Voucher memakai kode uniknya, sedangkan member tidak punya kode sama
+    // sekali. Backend mencari akun dari kode voucher dulu, lalu jatuh ke
+    // pencocokan nama member, jadi untuk member yang dikirim adalah namanya.
+    final kredensial = voucher ? akun.kodeUnik : akun.nama;
+    if (kredensial == null || kredensial.isEmpty) {
+      _toast(context, 'Akun dibuat, tapi kredensialnya tidak terbaca.', false);
+      return;
+    }
+
+    final err = await provider.startSession(pcId: pc.id, kode: kredensial);
+    if (!context.mounted) return;
+    _toast(
+      context,
+      err ?? 'Sesi di ${pc.namaPc} berjalan dengan $kredensial.',
+      err == null,
+    );
   }
 
   Future<void> _confirmEnd(
