@@ -47,6 +47,26 @@ jobs:
       - name: Jalankan test
         run: flutter test --no-pub
 
+      - name: Siapkan keystore rilis
+        # Keystore TIDAK disimpan di repo. Workflow ini mengambilnya dari
+        # secret KEYS_BASE64. Kalau secret belum diisi, build tetap jalan
+        # dengan debug key supaya pipeline tidak macet, hasilnya hanya untuk
+        # pengujian.
+        run: |
+          if [ -n "${{ secrets.KEYS_BASE64 }}" ]; then
+            echo "${{ secrets.KEYS_BASE64 }}" | base64 -d \
+              > android/app/v3netbill-release.jks
+            cat > android/key.properties <<EOF
+          storeFile=v3netbill-release.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+            echo "  keystore rilis dipakai"
+          else
+            echo "  secret KEYS_BASE64 kosong, pakai debug key"
+          fi
+
       - name: Build APK release
         run: |
           flutter build apk --release --split-per-abi \
