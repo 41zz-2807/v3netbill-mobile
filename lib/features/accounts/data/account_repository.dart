@@ -9,7 +9,7 @@ import '../models/account.dart';
 /// dan nama field-nya bukan tebakan:
 ///
 /// - `POST /accounts/voucher`  body `{ nominal }`
-/// - `POST /accounts/member`   body `{ nama, password, nominal }`
+/// - `POST /accounts/member`   body `{ nama, nominal }`
 /// - `POST /accounts/:id/topup`    body `{ nominal }`
 /// - `POST /accounts/:id/koreksi`  body `{ nominal }`
 /// - `POST /accounts/:id/revoke`    tanpa body
@@ -54,23 +54,20 @@ class AccountRepository {
 
   /// Buat member baru.
   ///
-  /// Member wajib punya password karena kasir membukanya dari halaman
-  /// kasir, dan backend mewajibkan panjang minimal 4 karakter.
+  /// Password tidak diminta lagi. Backend memberi semua akun baru password
+  /// bawaan yang sama, dan pelanggan bisa menggantinya sendiri dari komputer
+  /// lewat tombol "Buat Password" di agent.
   Future<Account> createMember({
     required String nama,
-    required String password,
     required int nominal,
   }) async {
     _validasiNominal(nominal);
     if (nama.trim().isEmpty) {
       throw ApiException('Nama member wajib diisi.');
     }
-    if (password.length < 4) {
-      throw ApiException('Password member minimal 4 karakter.');
-    }
     final data = await _api.post(
       '${ApiConfig.accounts}/member',
-      data: {'nama': nama.trim(), 'password': password, 'nominal': nominal},
+      data: {'nama': nama.trim(), 'nominal': nominal},
     );
     return Account.fromJson(Map<String, dynamic>.from(data as Map));
   }

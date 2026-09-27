@@ -42,7 +42,6 @@ class _FakeAccountRepository implements AccountRepository {
   @override
   Future<Account> createMember({
     required String nama,
-    required String password,
     required int nominal,
   }) async {
     lastNama = nama;
@@ -89,7 +88,6 @@ void main() {
 
       final akun = await p.createMemberDapatKode(
         nama: 'Budi',
-        password: '1234',
         nominal: 20000,
       );
 

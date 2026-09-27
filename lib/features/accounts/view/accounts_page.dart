@@ -194,7 +194,6 @@ class _AccountsPageState extends State<AccountsPage>
         ? await p.createVoucher(draft.nominal)
         : await p.createMember(
             nama: draft.nama,
-            password: draft.password,
             nominal: draft.nominal,
           );
 

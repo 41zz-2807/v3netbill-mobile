@@ -310,7 +310,6 @@ class PcCard extends StatelessWidget {
         ? await accounts.createVoucherDapatKode(draft.nominal)
         : await accounts.createMemberDapatKode(
             nama: draft.nama,
-            password: draft.password,
             nominal: draft.nominal,
           );
 

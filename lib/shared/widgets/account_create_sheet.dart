@@ -11,12 +11,10 @@ import '../../features/accounts/models/account.dart';
 class AccountDraft {
   const AccountDraft({
     required this.nama,
-    required this.password,
     required this.nominal,
   });
 
   final String nama;
-  final String password;
   final int nominal;
 }
 
@@ -55,7 +53,7 @@ Future<AccountDraft?> showAccountCreateSheet(
           ),
           const SizedBox(height: 4),
           const Text(
-            'Nominal harus kelipatan 500.',
+            'Password awal semua akun 0000, bisa diganti dari komputer.',
             style: TextStyle(color: AppColors.textMuted, fontSize: 12),
           ),
           const SizedBox(height: 20),
@@ -68,19 +66,6 @@ Future<AccountDraft?> showAccountCreateSheet(
                 prefixIcon: Icon(Icons.person_outline, size: 20),
               ),
             ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _sandiCtrl,
-              obscureText: true,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: const InputDecoration(
-                labelText: 'Password member',
-                hintText: 'Minimal 4 angka',
-                prefixIcon: Icon(Icons.lock_outline, size: 20),
-              ),
-            ),
-            const SizedBox(height: 14),
           ],
           TextField(
             controller: _nominalCtrl,
@@ -107,7 +92,6 @@ Future<AccountDraft?> showAccountCreateSheet(
 /// kali keyboard muncul atau hilang. Kalau controller dibuat di dalam builder,
 /// teks yang sudah diketik bisa ikut terhapus.
 final _namaCtrl = TextEditingController();
-final _sandiCtrl = TextEditingController();
 final _nominalCtrl = TextEditingController(text: '10000');
 
 /// Mengisi ulang controller sebelum form dibuka.
@@ -115,16 +99,12 @@ void _resetControllers(AccountType tipe) {
   _nominalCtrl.text = '10000';
   if (tipe == AccountType.member) {
     _namaCtrl.clear();
-    _sandiCtrl.clear();
   }
 }
 
 String? _validate(AccountType tipe) {
   if (tipe == AccountType.member && _namaCtrl.text.trim().isEmpty) {
     return 'Nama member wajib diisi.';
-  }
-  if (tipe == AccountType.member && _sandiCtrl.text.trim().length < 4) {
-    return 'Password member minimal 4 karakter.';
   }
   final nominal = int.tryParse(_nominalCtrl.text.trim());
   if (nominal == null) {
@@ -154,7 +134,6 @@ void _submit(BuildContext ctx, AccountType tipe) {
     ctx,
     AccountDraft(
       nama: _namaCtrl.text.trim(),
-      password: _sandiCtrl.text.trim(),
       nominal: int.parse(_nominalCtrl.text.trim()),
     ),
   );

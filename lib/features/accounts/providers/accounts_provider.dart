@@ -111,15 +111,10 @@ class AccountsProvider extends ChangeNotifier {
   /// Sama seperti [createVoucherDapatKode], tapi untuk member.
   Future<Account?> createMemberDapatKode({
     required String nama,
-    required String password,
     required int nominal,
   }) =>
       _createAndReturn(
-        () => _repo.createMember(
-          nama: nama,
-          password: password,
-          nominal: nominal,
-        ),
+        () => _repo.createMember(nama: nama, nominal: nominal),
       );
 
   Future<Account?> _createAndReturn(Future<Account> Function() action) async {
@@ -141,16 +136,11 @@ class AccountsProvider extends ChangeNotifier {
 
   Future<bool> createMember({
     required String nama,
-    required String password,
     required int nominal,
   }) =>
       _mutate(
         () async {
-          await _repo.createMember(
-            nama: nama,
-            password: password,
-            nominal: nominal,
-          );
+          await _repo.createMember(nama: nama, nominal: nominal);
         },
         'Gagal membuat member.',
       );

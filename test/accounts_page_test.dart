@@ -30,7 +30,6 @@ class _FixtureRepo implements AccountRepository {
   @override
   Future<Account> createMember({
     required String nama,
-    required String password,
     required int nominal,
   }) async =>
       akun.first;
