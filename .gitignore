@@ -29,3 +29,8 @@ key.properties
 
 # Log
 *.log
+
+# Token GitHub pribadi. Repo ini public, jadi file ini TIDAK BOLEH ikut
+# commit. Dipakai lewat GH_TOKEN="$(cat github-token.txt)" saat download
+# artifact dari CI.
+github-token.txt

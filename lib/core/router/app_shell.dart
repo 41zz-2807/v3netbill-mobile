@@ -5,9 +5,7 @@ import '../../features/accounts/view/accounts_page.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/view/login_page.dart';
 import '../../features/pcs/view/dashboard_page.dart';
-import '../../features/pcs/view/pc_list_page.dart';
 import '../../features/profile/view/profile_page.dart';
-import '../../features/transactions/view/transactions_page.dart';
 import '../theme/app_colors.dart';
 
 /// Kerangka aplikasi: menampilkan login dulu, lalu membungkus seluruh halaman
@@ -46,9 +44,7 @@ class _AppShellState extends State<AppShell> {
               index: _index,
               children: const [
                 DashboardPage(),
-                PcListPage(),
                 AccountsPage(),
-                TransactionsPage(),
                 ProfilePage(),
               ],
             ),
@@ -56,6 +52,9 @@ class _AppShellState extends State<AppShell> {
           bottomNavigationBar: NavigationBar(
             selectedIndex: _index,
             onDestinationSelected: (i) => setState(() => _index = i),
+            // Halaman PC dan Transaksi sengaja tidak ada sebagai tab terpisah.
+            // Semua PC sudah tampil di dashboard, jadi tab PC hanya menduplikasi
+            // isi yang sama.
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.home_outlined),
@@ -63,19 +62,9 @@ class _AppShellState extends State<AppShell> {
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: Icon(Icons.computer_outlined),
-                selectedIcon: Icon(Icons.computer),
-                label: 'PC',
-              ),
-              NavigationDestination(
                 icon: Icon(Icons.confirmation_number_outlined),
                 selectedIcon: Icon(Icons.confirmation_number),
                 label: 'Voucher',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long),
-                label: 'Transaksi',
               ),
               NavigationDestination(
                 icon: Icon(Icons.person_outline),

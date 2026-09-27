@@ -88,6 +88,27 @@ class Pc {
 
   bool get hasSession => session != null;
 
+  /// Berapa detik sejak heartbeat terakhir, atau null kalau tidak pernah.
+  int? get detikSejakHeartbeat {
+    final t = lastHeartbeatAt;
+    if (t == null) return null;
+    final d = DateTime.now().difference(t.toLocal()).inSeconds;
+    return d < 0 ? 0 : d;
+  }
+
+  /// Ambang heartbeat yang masih dianggap sehat.
+  ///
+  /// Agent PC mengirim heartbeat secara berkala, jadi 30 detik tanpa satu pun
+  /// heartbeat berarti koneksi sudah tidak sehat walau status di server masih
+  ///bilang IDLE.
+  static const ambangSehatDetik = 30;
+
+  /// Icon heartbeat hijau kalau agent masih sehat koneksinya.
+  bool get heartbeatSehat {
+    final d = detikSejakHeartbeat;
+    return d != null && d < ambangSehatDetik;
+  }
+
   factory Pc.fromJson(Map<String, dynamic> json) {
     final sess = json['session'];
     return Pc(

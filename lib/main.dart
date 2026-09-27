@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'core/network/api_client.dart';
@@ -12,11 +13,17 @@ import 'features/accounts/providers/accounts_provider.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/pcs/data/pc_repository.dart';
-import 'features/transactions/data/transactions_repository.dart';
 import 'features/pcs/providers/pc_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // WAJIB: `intl` tidak memuat data tanggal secara otomatis. Tanpa baris ini
+  // setiap `DateFormat(..., 'id_ID')` melempar LocaleDataException, dan karena
+  // format tanggal dipakai di dalam daftar akun, seluruh kartu gagal dibangun
+  // sehingga daftar voucher dan member tampil kosong tanpa pesan apa pun.
+  await initializeDateFormatting('id_ID', null);
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -50,11 +57,6 @@ class V3NetbillApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => AccountsProvider(AccountRepository(api)),
-        ),
-        // Repository transaksi dipakai halaman transaksi, jadi didaftarkan
-        // supaya halaman tidak memanggil API langsung.
-        Provider<TransactionsRepository>(
-          create: (_) => TransactionsRepository(api),
         ),
       ],
       child: MaterialApp(

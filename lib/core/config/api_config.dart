@@ -38,9 +38,6 @@ class ApiConfig {
   // --- Endpoint akun (voucher & member) ---
   static const accounts = '/accounts';
 
-  // --- Endpoint transaksi ---
-  static const transactions = '/transactions';
-
   // --- Endpoint laporan ---
   static const reportsToday = '/reports/today';
 }

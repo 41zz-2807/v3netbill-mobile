@@ -141,11 +141,22 @@ class PcCard extends StatelessWidget {
           ],
 
           const SizedBox(height: 12),
-          Text(
-            'Heartbeat ${Formatters.relative(pc.lastHeartbeatAt)}',
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+          // Heartbeat cukup ditampilkan sebagai icon, tanpa tulisan, supaya
+          // kartu tidak bertambah tinggi. Ikon hijau berarti agent PC masih
+          // heartbeat dalam 30 detik terakhir. Keterangan penuhnya ada di
+          // tooltip karena di layar kecil teksnya memenuhi baris sendiri.
+          Tooltip(
+            message: pc.detikSejakHeartbeat == null
+                ? 'Belum pernah heartbeat'
+                : 'Heartbeat ${pc.detikSejakHeartbeat} detik lalu',
+            child: Icon(
+              Icons.computer,
+              size: 15,
+              color: pc.heartbeatSehat ? AppColors.active : AppColors.textMuted,
+            ),
           ),
           const SizedBox(height: 12),
+
 
           // Aksi utama
           SizedBox(

@@ -1,0 +1,972 @@
+[
+ {
+  "id": "6e312f6d-237e-4c41-99d7-8411bc99d80d",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "gema2",
+  "sisaWaktuDetik": 12000,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T15:35:26.326Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "3cd88f20-6752-4d32-aa12-a366b17fc05a",
+  "tipe": "VOUCHER",
+  "kodeUnik": "238496",
+  "nama": null,
+  "sisaWaktuDetik": 783,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T15:34:35.194Z",
+  "lastUsedAt": "2026-09-27T15:34:35.879Z"
+ },
+ {
+  "id": "7d555d76-9044-40db-84de-4d9f14650328",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "Uji Alur Sesi 1314566",
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-27T14:51:42.583Z",
+  "lastUsedAt": "2026-09-27T14:56:17.241Z"
+ },
+ {
+  "id": "c1e3ed8a-e488-4ef6-b7e1-3787b6726b90",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "Uji Alur Sesi",
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-27T14:51:11.340Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "5092f582-d93b-4f10-a36d-41fe958c6415",
+  "tipe": "VOUCHER",
+  "kodeUnik": "782739",
+  "nama": null,
+  "sisaWaktuDetik": 6000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-27T14:51:09.329Z",
+  "lastUsedAt": "2026-09-27T14:56:32.100Z"
+ },
+ {
+  "id": "ce8fcd4b-4eff-4bec-b047-38f2164c19c1",
+  "tipe": "VOUCHER",
+  "kodeUnik": "383416",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T13:59:43.859Z",
+  "lastUsedAt": "2026-09-27T14:01:07.990Z"
+ },
+ {
+  "id": "2e95197c-7f25-4c60-9f91-d8a223df0e54",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "Uji Member",
+  "sisaWaktuDetik": 1200,
+  "status": "REVOKED",
+  "createdAt": "2026-09-27T11:43:33.852Z",
+  "lastUsedAt": "2026-09-27T11:43:34.536Z"
+ },
+ {
+  "id": "aa0e6661-1d03-4bd2-9241-802cca91c731",
+  "tipe": "VOUCHER",
+  "kodeUnik": "998513",
+  "nama": null,
+  "sisaWaktuDetik": 600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-27T11:43:21.305Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "a44ef56e-3e5a-4128-bb74-ffcfb3f707f4",
+  "tipe": "VOUCHER",
+  "kodeUnik": "375099",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T10:21:19.339Z",
+  "lastUsedAt": "2026-09-27T10:21:35.365Z"
+ },
+ {
+  "id": "200ac533-d20f-499f-8144-642055252b55",
+  "tipe": "VOUCHER",
+  "kodeUnik": "137056",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T09:39:39.212Z",
+  "lastUsedAt": "2026-09-27T09:39:39.266Z"
+ },
+ {
+  "id": "87e11e49-ce00-4ff6-ba31-351b36add768",
+  "tipe": "VOUCHER",
+  "kodeUnik": "992077",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T08:03:54.940Z",
+  "lastUsedAt": "2026-09-27T08:03:55.002Z"
+ },
+ {
+  "id": "049fa545-2e95-4d06-9d1d-d828e7494fd7",
+  "tipe": "VOUCHER",
+  "kodeUnik": "304881",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T04:55:31.649Z",
+  "lastUsedAt": "2026-09-27T04:58:10.596Z"
+ },
+ {
+  "id": "3f7fc045-6117-475f-827c-8db04cd1d869",
+  "tipe": "VOUCHER",
+  "kodeUnik": "237586",
+  "nama": null,
+  "sisaWaktuDetik": 1126,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T04:44:37.770Z",
+  "lastUsedAt": "2026-09-27T11:45:34.985Z"
+ },
+ {
+  "id": "52746033-4e62-4633-a175-0239f99e6ae7",
+  "tipe": "VOUCHER",
+  "kodeUnik": "195551",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-27T04:30:38.292Z",
+  "lastUsedAt": "2026-09-27T04:38:53.680Z"
+ },
+ {
+  "id": "4447d29c-2e0d-43f3-a1e1-f183b3cd366f",
+  "tipe": "VOUCHER",
+  "kodeUnik": "715205",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-26T11:37:54.522Z",
+  "lastUsedAt": "2026-09-26T11:37:54.745Z"
+ },
+ {
+  "id": "d64c1e30-cc95-4be4-a769-421e4989af0b",
+  "tipe": "VOUCHER",
+  "kodeUnik": "690336",
+  "nama": null,
+  "sisaWaktuDetik": 7200,
+  "status": "ACTIVE",
+  "createdAt": "2026-09-26T10:00:47.967Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "00b758b0-6007-45f8-a6e0-b9b421fc1e99",
+  "tipe": "VOUCHER",
+  "kodeUnik": "786426",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T08:05:33.599Z",
+  "lastUsedAt": "2026-09-26T08:05:33.621Z"
+ },
+ {
+  "id": "c2bb9219-3578-4ab8-a2f5-2a12ff3cd052",
+  "tipe": "VOUCHER",
+  "kodeUnik": "226919",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:02.061Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "739fd5c7-a0fe-464a-8e28-eeaf0766e82b",
+  "tipe": "VOUCHER",
+  "kodeUnik": "185273",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.946Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "fad2a6ad-aecc-4c7b-860f-908f77acbddf",
+  "tipe": "VOUCHER",
+  "kodeUnik": "617627",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.812Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "3f9fea2b-5510-4f99-8e6f-0c97480bb624",
+  "tipe": "VOUCHER",
+  "kodeUnik": "337953",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.671Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "7d3f26c8-8319-4067-a8ce-b6373fe571f9",
+  "tipe": "VOUCHER",
+  "kodeUnik": "699095",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.557Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "359b4c30-728a-4176-b661-314b95f1556a",
+  "tipe": "VOUCHER",
+  "kodeUnik": "128090",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.446Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "07cfc862-02ee-40ff-b4e8-7c93be9f5e92",
+  "tipe": "VOUCHER",
+  "kodeUnik": "716073",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.343Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "d0d21a35-422c-4de1-9e4f-fa35690e610a",
+  "tipe": "VOUCHER",
+  "kodeUnik": "559741",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.205Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "a365412b-9e7e-48f5-934b-1f968b47d0fa",
+  "tipe": "VOUCHER",
+  "kodeUnik": "182161",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:01.084Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "f74254bf-804e-4474-97da-3e5eadd44168",
+  "tipe": "VOUCHER",
+  "kodeUnik": "763968",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.971Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "5d03a691-61fe-4f91-9146-86eab5c04ef7",
+  "tipe": "VOUCHER",
+  "kodeUnik": "144259",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.866Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "da09aaa1-9b09-4a49-8a7e-780e28a59f44",
+  "tipe": "VOUCHER",
+  "kodeUnik": "367345",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.670Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "7bafee79-d714-4bb9-bf67-2a05c985c6b0",
+  "tipe": "VOUCHER",
+  "kodeUnik": "970671",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.552Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "feafd1e1-58b1-4217-9329-50b975f28f24",
+  "tipe": "VOUCHER",
+  "kodeUnik": "520800",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.445Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "9264f1a4-6613-4e6b-b45b-3b3cd86a939b",
+  "tipe": "VOUCHER",
+  "kodeUnik": "967951",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.336Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "8bfab8d1-e9ba-4d74-ace6-4f0910ed8f57",
+  "tipe": "VOUCHER",
+  "kodeUnik": "554243",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.221Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "823a2a25-0add-4b9e-8038-d3bc260eb20e",
+  "tipe": "VOUCHER",
+  "kodeUnik": "936172",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:10:00.096Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "84460c1d-bbb7-4647-96a6-6e76f279e744",
+  "tipe": "VOUCHER",
+  "kodeUnik": "790040",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:09:59.972Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "d850ab4e-5d5a-4f60-aa2d-0ccdacb875ef",
+  "tipe": "VOUCHER",
+  "kodeUnik": "563838",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:09:59.846Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "bd1fd435-ae74-4f75-95b8-025f44bd8b61",
+  "tipe": "VOUCHER",
+  "kodeUnik": "946441",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:09:59.735Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "c6dce8b2-5db2-4e36-96b3-add560e53cb6",
+  "tipe": "VOUCHER",
+  "kodeUnik": "344299",
+  "nama": null,
+  "sisaWaktuDetik": 1200,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:05:38.647Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "c9f7f9bd-7e47-4b7b-877e-482e7fc67da1",
+  "tipe": "VOUCHER",
+  "kodeUnik": "679500",
+  "nama": null,
+  "sisaWaktuDetik": 1149,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T07:05:34.800Z",
+  "lastUsedAt": "2026-09-26T07:05:34.832Z"
+ },
+ {
+  "id": "999f5959-18d3-4c0c-b5b8-28a949a03dcd",
+  "tipe": "VOUCHER",
+  "kodeUnik": "612148",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T06:45:26.496Z",
+  "lastUsedAt": "2026-09-26T06:45:33.892Z"
+ },
+ {
+  "id": "7c583bc3-7c1c-491e-b4e6-2850b3264283",
+  "tipe": "VOUCHER",
+  "kodeUnik": "641124",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T06:45:26.329Z",
+  "lastUsedAt": "2026-09-26T06:45:40.322Z"
+ },
+ {
+  "id": "7a38d440-3406-447b-811a-0120a128c04e",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "aziz2",
+  "sisaWaktuDetik": 3600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T06:41:17.956Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "68cfe9b7-d4e0-42d7-9dea-503064ba18ff",
+  "tipe": "VOUCHER",
+  "kodeUnik": "668657",
+  "nama": null,
+  "sisaWaktuDetik": 3600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T06:40:59.543Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "fe05c620-04c4-4bb2-8a9a-d94334efe5ad",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "aziz",
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T06:14:43.819Z",
+  "lastUsedAt": "2026-09-26T08:39:51.209Z"
+ },
+ {
+  "id": "a5467b47-609d-4178-9e80-34ae34c2f850",
+  "tipe": "VOUCHER",
+  "kodeUnik": "989909",
+  "nama": null,
+  "sisaWaktuDetik": 1170,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T05:24:35.548Z",
+  "lastUsedAt": "2026-09-26T05:24:35.570Z"
+ },
+ {
+  "id": "dfb8f82b-5c0e-4d19-a15a-c3537aa7208b",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "gema",
+  "sisaWaktuDetik": 1800,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T05:17:34.946Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "967cc9f5-4e92-4d62-b4b7-bee717561857",
+  "tipe": "VOUCHER",
+  "kodeUnik": "227411",
+  "nama": null,
+  "sisaWaktuDetik": 1200,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T05:07:19.279Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "8aa727de-672e-46ad-969f-8b43afa512ff",
+  "tipe": "VOUCHER",
+  "kodeUnik": "928376",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T04:47:33.188Z",
+  "lastUsedAt": "2026-09-26T04:47:33.214Z"
+ },
+ {
+  "id": "b5e4afc0-6ade-4dde-bf33-a24e54acd9f3",
+  "tipe": "VOUCHER",
+  "kodeUnik": "225829",
+  "nama": null,
+  "sisaWaktuDetik": 918,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T04:38:08.767Z",
+  "lastUsedAt": "2026-09-26T04:38:08.815Z"
+ },
+ {
+  "id": "bbe53e5f-ef00-4de0-adb4-def2357a146c",
+  "tipe": "VOUCHER",
+  "kodeUnik": "486429",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T04:10:07.068Z",
+  "lastUsedAt": "2026-09-26T04:10:07.112Z"
+ },
+ {
+  "id": "84be5c72-07e4-4349-80fa-44a31121419e",
+  "tipe": "VOUCHER",
+  "kodeUnik": "463654",
+  "nama": null,
+  "sisaWaktuDetik": 1123,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T02:55:13.347Z",
+  "lastUsedAt": "2026-09-26T02:55:13.373Z"
+ },
+ {
+  "id": "db66b44d-2b3d-4bbc-9991-a1528357edd7",
+  "tipe": "VOUCHER",
+  "kodeUnik": "389078",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-26T00:10:09.671Z",
+  "lastUsedAt": "2026-09-26T00:25:24.432Z"
+ },
+ {
+  "id": "c647014f-35dc-4e86-9e39-72eb6a69d47c",
+  "tipe": "VOUCHER",
+  "kodeUnik": "516561",
+  "nama": null,
+  "sisaWaktuDetik": 22704,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T16:19:36.186Z",
+  "lastUsedAt": "2026-09-25T16:24:53.841Z"
+ },
+ {
+  "id": "0f0d7bcc-a1da-4b0b-97b2-3bf2d6dc30d8",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "baru1",
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T14:18:28.563Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "24b9ace7-1e35-40e0-bf84-25195128c9e0",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "testbaru123",
+  "sisaWaktuDetik": 6000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T14:17:44.517Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "01b4621d-1c43-4254-97a9-3ce6cefa70fb",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "maryam",
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T14:10:28.629Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "b485b36a-bda2-47b9-ad0a-4e22169f01a3",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "maryam",
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T14:09:57.398Z",
+  "lastUsedAt": "2026-09-25T14:10:02.890Z"
+ },
+ {
+  "id": "983cd767-64cf-4363-a987-865502195e9e",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "maryam",
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T14:08:05.279Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "39fd7911-9940-41fa-93eb-029aae240735",
+  "tipe": "VOUCHER",
+  "kodeUnik": "950660",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T13:22:07.571Z",
+  "lastUsedAt": "2026-09-26T00:24:28.538Z"
+ },
+ {
+  "id": "fd7e0542-4dff-4a36-8aa0-ca2fa099fc6f",
+  "tipe": "VOUCHER",
+  "kodeUnik": "626324",
+  "nama": null,
+  "sisaWaktuDetik": 1800,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T12:22:09.398Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "c40420cf-4ccc-4f50-85da-7b49489d3c6e",
+  "tipe": "VOUCHER",
+  "kodeUnik": "326858",
+  "nama": null,
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T11:07:32.864Z",
+  "lastUsedAt": "2026-09-25T11:07:32.885Z"
+ },
+ {
+  "id": "5589ebc6-59d0-4721-accf-50ab728e4a53",
+  "tipe": "VOUCHER",
+  "kodeUnik": "190795",
+  "nama": null,
+  "sisaWaktuDetik": 1184,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T09:30:21.541Z",
+  "lastUsedAt": "2026-09-25T09:30:21.563Z"
+ },
+ {
+  "id": "81a20355-286b-478f-bc8a-871b41f53a76",
+  "tipe": "VOUCHER",
+  "kodeUnik": "490559",
+  "nama": null,
+  "sisaWaktuDetik": 5999,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T09:27:32.412Z",
+  "lastUsedAt": "2026-09-25T09:27:32.430Z"
+ },
+ {
+  "id": "612dc948-35b1-460d-959e-f17dd12576d1",
+  "tipe": "VOUCHER",
+  "kodeUnik": "894633",
+  "nama": null,
+  "sisaWaktuDetik": 5986,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T09:25:52.268Z",
+  "lastUsedAt": "2026-09-25T09:25:52.288Z"
+ },
+ {
+  "id": "ebcb9122-bb47-4174-8bc4-11452c5a52f8",
+  "tipe": "VOUCHER",
+  "kodeUnik": "630112",
+  "nama": null,
+  "sisaWaktuDetik": 1600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T09:14:56.294Z",
+  "lastUsedAt": "2026-09-25T09:14:56.314Z"
+ },
+ {
+  "id": "a4884452-ae5e-4ede-abc5-63b1572c8351",
+  "tipe": "VOUCHER",
+  "kodeUnik": "249189",
+  "nama": null,
+  "sisaWaktuDetik": 26013,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T08:48:11.778Z",
+  "lastUsedAt": "2026-09-25T09:12:44.282Z"
+ },
+ {
+  "id": "f863a12e-ebbc-4cba-90d8-32615039a747",
+  "tipe": "VOUCHER",
+  "kodeUnik": "847491",
+  "nama": null,
+  "sisaWaktuDetik": 658,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T07:53:00.612Z",
+  "lastUsedAt": "2026-09-25T07:53:00.634Z"
+ },
+ {
+  "id": "be135864-75d6-42e0-8106-e9f2b59965d1",
+  "tipe": "VOUCHER",
+  "kodeUnik": "964630",
+  "nama": null,
+  "sisaWaktuDetik": 1200,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T07:49:37.909Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "d533e749-4dd4-433f-b4d8-2c46f2fa6eb5",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "vtest_312",
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T07:30:08.085Z",
+  "lastUsedAt": "2026-09-25T07:30:08.384Z"
+ },
+ {
+  "id": "912c0e08-9b11-4856-a4f0-0122734eb361",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "ktarik_829",
+  "sisaWaktuDetik": 1200,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T07:24:37.443Z",
+  "lastUsedAt": "2026-09-25T07:24:37.746Z"
+ },
+ {
+  "id": "137e3be4-5f35-4986-8c59-6fd010b11022",
+  "tipe": "VOUCHER",
+  "kodeUnik": "624870",
+  "nama": null,
+  "sisaWaktuDetik": 3571,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T07:06:18.461Z",
+  "lastUsedAt": "2026-09-25T16:32:49.559Z"
+ },
+ {
+  "id": "716f6fe4-8363-4790-ac2c-a46796016800",
+  "tipe": "VOUCHER",
+  "kodeUnik": "342218",
+  "nama": null,
+  "sisaWaktuDetik": 11999,
+  "status": "REVOKED",
+  "createdAt": "2026-09-25T06:42:57.611Z",
+  "lastUsedAt": "2026-09-25T06:42:57.635Z"
+ },
+ {
+  "id": "aabfbae1-5685-423c-be21-5b2daf47688b",
+  "tipe": "VOUCHER",
+  "kodeUnik": "915704",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-24T17:21:42.775Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "fe5f840f-9664-4eb8-a6f9-a5f1399fd752",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "bilbil",
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-24T09:19:24.019Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "9eeaef9f-19c5-4940-b998-9a5797af1d2b",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "bilil",
+  "sisaWaktuDetik": 0,
+  "status": "REVOKED",
+  "createdAt": "2026-09-24T08:51:51.488Z",
+  "lastUsedAt": "2026-09-25T16:31:22.767Z"
+ },
+ {
+  "id": "b57d1140-81d9-4cb9-a73c-2e1f888cb033",
+  "tipe": "VOUCHER",
+  "kodeUnik": "321110",
+  "nama": null,
+  "sisaWaktuDetik": 441,
+  "status": "REVOKED",
+  "createdAt": "2026-09-24T08:50:41.982Z",
+  "lastUsedAt": "2026-09-25T12:21:55.053Z"
+ },
+ {
+  "id": "6452545b-35b7-451f-955e-b23c4c776738",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "bilal",
+  "sisaWaktuDetik": 14388,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T10:38:22.185Z",
+  "lastUsedAt": "2026-09-26T01:58:01.748Z"
+ },
+ {
+  "id": "9933e5e0-90af-4aee-b10e-54212467dc6a",
+  "tipe": "VOUCHER",
+  "kodeUnik": "796916",
+  "nama": null,
+  "sisaWaktuDetik": 60000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T10:37:57.191Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "4354b06d-71df-42dc-a379-7d0547d8361e",
+  "tipe": "VOUCHER",
+  "kodeUnik": "258059",
+  "nama": null,
+  "sisaWaktuDetik": 6000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T10:37:44.292Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "2de958d4-5b78-45fb-874d-eb1ffbab4d49",
+  "tipe": "VOUCHER",
+  "kodeUnik": "914747",
+  "nama": null,
+  "sisaWaktuDetik": 3600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T03:20:11.338Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "f4c962a6-4c73-4ed8-9521-842f7b9b2fc5",
+  "tipe": "VOUCHER",
+  "kodeUnik": "127466",
+  "nama": null,
+  "sisaWaktuDetik": 1800,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T03:01:33.585Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "19bbc86f-16f5-49d4-92b0-51d2fca9e1e0",
+  "tipe": "VOUCHER",
+  "kodeUnik": "116557",
+  "nama": null,
+  "sisaWaktuDetik": 3600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T02:59:52.728Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "e4795f5c-efc9-4993-a815-0afccbfca7a5",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "maryam",
+  "sisaWaktuDetik": 3528,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T02:59:28.275Z",
+  "lastUsedAt": "2026-09-25T14:08:21.818Z"
+ },
+ {
+  "id": "0f6364d0-664d-4a6c-bdc6-b0a5708949bf",
+  "tipe": "VOUCHER",
+  "kodeUnik": "332615",
+  "nama": null,
+  "sisaWaktuDetik": 2400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-23T02:58:31.379Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "10315b7c-bcc3-4cb9-857d-75193c40bb9b",
+  "tipe": "VOUCHER",
+  "kodeUnik": "520962",
+  "nama": null,
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T23:27:47.268Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "7c198883-6cd8-4713-973b-8bf5552b2c31",
+  "tipe": "VOUCHER",
+  "kodeUnik": "103387",
+  "nama": null,
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T23:27:47.157Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "16d6fe7d-65ea-41b6-b670-a035fa652657",
+  "tipe": "VOUCHER",
+  "kodeUnik": "572756",
+  "nama": null,
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T23:27:47.035Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "2d31fc9c-ff13-4906-b45f-177f7a7446ec",
+  "tipe": "VOUCHER",
+  "kodeUnik": "349842",
+  "nama": null,
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T23:27:36.889Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "aefc80c7-68bd-496e-9d26-05851893127b",
+  "tipe": "VOUCHER",
+  "kodeUnik": "215995",
+  "nama": null,
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T23:27:36.730Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "c87b603e-a669-442e-9c5e-802c3481d3ac",
+  "tipe": "VOUCHER",
+  "kodeUnik": "768179",
+  "nama": null,
+  "sisaWaktuDetik": 12000,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T23:27:36.484Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "f8b16cff-d61c-4808-9137-6d65bf982712",
+  "tipe": "VOUCHER",
+  "kodeUnik": "790416",
+  "nama": null,
+  "sisaWaktuDetik": 600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T22:59:03.953Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "12fcdfcd-eff6-47a0-bb8f-6a171f801789",
+  "tipe": "MEMBER",
+  "kodeUnik": null,
+  "nama": "gg",
+  "sisaWaktuDetik": 4188,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T22:44:34.032Z",
+  "lastUsedAt": "2026-09-26T01:55:48.166Z"
+ },
+ {
+  "id": "1fd7e51a-04b4-429b-af5a-7f43e64abde2",
+  "tipe": "VOUCHER",
+  "kodeUnik": "836954",
+  "nama": null,
+  "sisaWaktuDetik": 800,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T22:44:14.334Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "a74328f2-2fbe-46f5-80a0-d5fa9cb8ff94",
+  "tipe": "VOUCHER",
+  "kodeUnik": "182897",
+  "nama": null,
+  "sisaWaktuDetik": 800,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T17:14:48.932Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "0f37e271-06fa-41b9-a07b-16099d371e8a",
+  "tipe": "VOUCHER",
+  "kodeUnik": "460583",
+  "nama": null,
+  "sisaWaktuDetik": 800,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T17:12:45.662Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "983136cf-26ce-478d-8986-5f2164f013d7",
+  "tipe": "VOUCHER",
+  "kodeUnik": "793857",
+  "nama": null,
+  "sisaWaktuDetik": 600,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T17:03:07.407Z",
+  "lastUsedAt": null
+ },
+ {
+  "id": "f9bd5c6b-223d-4fc1-821e-2eb454506cb6",
+  "tipe": "VOUCHER",
+  "kodeUnik": "549896",
+  "nama": null,
+  "sisaWaktuDetik": 400,
+  "status": "REVOKED",
+  "createdAt": "2026-09-22T16:26:41.763Z",
+  "lastUsedAt": null
+ }
+]

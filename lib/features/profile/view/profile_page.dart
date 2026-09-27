@@ -13,7 +13,6 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final session = auth.session;
-    final pc = context.watch<PcProvider>();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -89,37 +88,9 @@ class ProfilePage extends StatelessWidget {
 
         const SizedBox(height: 18),
 
-        // Ringkasan cepat
-        Row(
-          children: [
-            Expanded(
-              child: _MiniStat(
-                label: 'PC Aktif',
-                value: '${pc.totalAktif}',
-                color: AppColors.active,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _MiniStat(
-                label: 'PC Idle',
-                value: '${pc.totalIdle}',
-                color: AppColors.idle,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _MiniStat(
-                label: 'Offline',
-                value: '${pc.totalOffline}',
-                color: AppColors.danger,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 18),
-
+        // Ringkasan jumlah PC sengaja tidak ada di sini. Angka yang sama sudah
+        // tampil sebagai StatCard di dashboard, jadi di sini hanya info akun
+        // dan info server.
         Container(
           decoration: BoxDecoration(
             color: AppColors.bgCard,
@@ -193,47 +164,6 @@ class ProfilePage extends StatelessWidget {
     // request tetap berjalan setelah pengguna keluar.
     context.read<PcProvider>().clear();
     await auth.logout();
-  }
-}
-
-class _MiniStat extends StatelessWidget {
-  const _MiniStat({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
-          ),
-        ],
-      ),
-    );
   }
 }
 
