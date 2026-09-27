@@ -50,8 +50,8 @@ jobs:
       - name: Siapkan keystore rilis
         # Keystore TIDAK disimpan di repo. Workflow ini mengambilnya dari
         # secret KEYS_BASE64. Kalau secret belum diisi, build tetap jalan
-        # dengan debug key supaya pipeline tidak macet, hasilnya hanya untuk
-        # pengujian.
+        # dengan debug key supaya pipeline tidak macet, hanya saja hasilnya
+        # tidak cocok untuk dibagikan karena ditandatangani debug.
         run: |
           if [ -n "${{ secrets.KEYS_BASE64 }}" ]; then
             echo "${{ secrets.KEYS_BASE64 }}" | base64 -d \
@@ -67,11 +67,20 @@ jobs:
             echo "  secret KEYS_BASE64 kosong, pakai debug key"
           fi
 
-      - name: Build APK release
+      - name: Build APK release universal
+        # Universal, bukan --split-per-abi, supaya hasilnya satu file yang bisa
+        # dipasang di HP mana pun. Split per-ABI masih dipakai sebagai langkah
+        # tambahan untuk yang mau mengunduh versi lebih kecil.
+        run: |
+          flutter build apk --release \
+            --dart-define=API_BASE_URL=https://v3netbill.bilmary.my.id/api \
+            --dart-define=API_WS_URL=wss://v3netbill.bilmary.my.id/session
+
+      - name: Build APK release per-ABI
         run: |
           flutter build apk --release --split-per-abi \
             --dart-define=API_BASE_URL=https://v3netbill.bilmary.my.id/api \
-            --dart-define=API_WS_URL=wss://v3netbill.bilmary.my.id/socket.io
+            --dart-define=API_WS_URL=wss://v3netbill.bilmary.my.id/session
 
       - name: Kumpulkan APK
         run: |
@@ -85,10 +94,10 @@ jobs:
       - name: Unggah APK sebagai artifact
         uses: actions/upload-artifact@v4
         with:
-          name: v3netbill-apk
+          name: v3netbill-apk-universal
           path: apk/*.apk
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 60
 
       - name: Ringkasan
         if: always()
