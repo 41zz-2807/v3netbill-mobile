@@ -15,10 +15,18 @@ class ApiConfig {
     defaultValue: 'https://v3netbill.bilmary.my.id/api',
   );
 
-  /// Asal WebSocket untuk status realtime.
+  /// Asal Socket.IO.
+  ///
+  /// PENTING: gateway backend memakai namespace `/session`
+  /// (lihat `WebSocketGateway` di session.gateway.ts). Socket yang
+  /// terhubung ke root akan connect dengan sukses, tapi semua perintah
+  /// tidak akan sampai ke gateway dan tidak ada balasan apa pun.
+  ///
+  /// Bisa dioverride saat build:
+  /// `flutter build apk --dart-define=API_WS_URL=wss://host/session`
   static const wsOrigin = String.fromEnvironment(
     'API_WS_URL',
-    defaultValue: 'wss://v3netbill.bilmary.my.id/socket.io',
+    defaultValue: 'wss://v3netbill.bilmary.my.id/session',
   );
 
   // --- Endpoint auth ---

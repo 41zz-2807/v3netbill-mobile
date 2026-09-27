@@ -38,15 +38,20 @@ class _AppShellState extends State<AppShell> {
 
       case AuthStatus.authenticated:
         return Scaffold(
-          body: IndexedStack(
-            index: _index,
-            children: const [
-              DashboardPage(),
-              PcListPage(),
-              AccountsPage(),
-              TransactionsPage(),
-              ProfilePage(),
-            ],
+          // SafeArea menjaga isi tidak menimpa bar status HP, seperti jam
+          // sinyal, dan bar navigasi Android di bagian bawah.
+          body: SafeArea(
+            bottom: false,
+            child: IndexedStack(
+              index: _index,
+              children: const [
+                DashboardPage(),
+                PcListPage(),
+                AccountsPage(),
+                TransactionsPage(),
+                ProfilePage(),
+              ],
+            ),
           ),
           bottomNavigationBar: NavigationBar(
             selectedIndex: _index,

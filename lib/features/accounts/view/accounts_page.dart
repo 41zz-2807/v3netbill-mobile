@@ -188,6 +188,7 @@ class _AccountsPageState extends State<AccountsPage>
   ) async {
     final isVoucher = p.tab == AccountType.voucher;
     final namaCtrl = TextEditingController();
+    final sandiCtrl = TextEditingController();
     final nominalCtrl = TextEditingController(text: '10000');
 
     final submit = await showModalBottomSheet<bool>(
@@ -229,6 +230,21 @@ class _AccountsPageState extends State<AccountsPage>
               ),
               const SizedBox(height: 14),
             ],
+            if (!isVoucher) ...[
+              const SizedBox(height: 14),
+              TextField(
+                controller: sandiCtrl,
+                obscureText: true,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: const InputDecoration(
+                  labelText: 'Password member',
+                  hintText: 'Minimal 4 angka',
+                  prefixIcon: Icon(Icons.lock_outline, size: 20),
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
             TextField(
               controller: nominalCtrl,
               keyboardType: TextInputType.number,
@@ -244,6 +260,7 @@ class _AccountsPageState extends State<AccountsPage>
               onPressed: () {
                 if (nominalCtrl.text.trim().isEmpty) return;
                 if (!isVoucher && namaCtrl.text.trim().isEmpty) return;
+                if (!isVoucher && sandiCtrl.text.length < 4) return;
                 Navigator.pop(ctx, true);
               },
               child: const Text('Simpan'),
@@ -260,6 +277,7 @@ class _AccountsPageState extends State<AccountsPage>
         ? await p.createVoucher(nominal)
         : await p.createMember(
             nama: namaCtrl.text.trim(),
+            password: sandiCtrl.text.trim(),
             nominal: nominal,
           );
 

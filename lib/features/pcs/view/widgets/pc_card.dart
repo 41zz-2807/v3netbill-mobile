@@ -9,8 +9,8 @@ import '../../providers/pc_provider.dart';
 
 /// Kartu satu PC beserta tombol aksi.
 ///
-/// Dipakai oleh [DashboardPage] dan [PcListPage] supaya tampilan dan
-/// perilakunya identik di dua tempat.
+/// Dipakai oleh dashboard dan halaman PC supaya tampilan dan perilakunya
+/// identik di dua tempat.
 class PcCard extends StatelessWidget {
   const PcCard({super.key, required this.pc});
 
@@ -80,13 +80,59 @@ class PcCard extends StatelessWidget {
                   label: pc.status.label, color: color, softColor: soft),
             ],
           ),
+
+          // Info sesi yang sedang berjalan, kalau ada.
+          if (pc.hasSession) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.bgCardAlt,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.confirmation_number_outlined,
+                    size: 15,
+                    color: AppColors.primaryLight,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      pc.session!.displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    Formatters.duration(pc.session!.sisaDetik),
+                    style: const TextStyle(
+                      color: AppColors.active,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: 12),
           Text(
             'Heartbeat ${Formatters.relative(pc.lastHeartbeatAt)}',
             style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
           ),
           const SizedBox(height: 12),
-          // Start
+
+          // Aksi utama
           SizedBox(
             width: double.infinity,
             child: PcActionButton(
@@ -101,26 +147,17 @@ class PcCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
+              // Backend tidak punya perintah stop terpisah untuk operator.
+              // Mengakhiri sesi dan mengunci layar memakai perintah yang sama,
+              // jadi dua tombol itu digabung di sini.
               Expanded(
                 child: PcActionButton(
-                  label: 'Kunci',
+                  label: 'Akhiri Sesi',
                   icon: Icons.lock_outline,
                   color: AppColors.idle,
                   enabled: pc.status.canOperate && !busy,
                   loading: busy,
-                  onTap: () => _run(context, provider.lock(pc.id), 'Kunci'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: PcActionButton(
-                  label: 'Stop',
-                  icon: Icons.stop_circle_outlined,
-                  color: AppColors.danger,
-                  enabled: pc.status.canOperate && !busy,
-                  loading: busy,
-                  onTap: () =>
-                      _run(context, provider.stopSession(pc.id), 'Stop'),
+                  onTap: () => _confirmEnd(context, provider),
                 ),
               ),
               const SizedBox(width: 8),
@@ -141,12 +178,13 @@ class PcCard extends StatelessWidget {
     );
   }
 
+  /// Dialog mulai sesi. Backend hanya meminta kode voucher atau member,
+  /// tanpa password, karena proses ini dilakukan dari sisi operator.
   Future<void> _startSession(
     BuildContext context,
     PcProvider provider,
   ) async {
     final kodeCtrl = TextEditingController();
-    final sandiCtrl = TextEditingController();
     final submit = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -155,7 +193,7 @@ class PcCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Masukkan kode voucher atau member beserta passwordnya.',
+              'Masukkan kode voucher atau member.',
               style: TextStyle(fontSize: 12, color: AppColors.textMuted),
             ),
             const SizedBox(height: 16),
@@ -167,18 +205,6 @@ class PcCard extends StatelessWidget {
               style: const TextStyle(color: AppColors.textPrimary),
               decoration: const InputDecoration(
                 labelText: 'Kode',
-                counterText: '',
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: sandiCtrl,
-              maxLength: 4,
-              obscureText: true,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: const InputDecoration(
-                labelText: 'Password',
                 counterText: '',
               ),
             ),
@@ -199,46 +225,45 @@ class PcCard extends StatelessWidget {
 
     if (submit != true || !context.mounted) return;
     final kode = kodeCtrl.text.trim();
-    final sandi = sandiCtrl.text.trim();
-    if (kode.isEmpty || sandi.isEmpty) {
-      _toast(context, 'Kode dan password wajib diisi.', false);
+    if (kode.isEmpty) {
+      _toast(context, 'Kode wajib diisi.', false);
       return;
     }
-    final ok = await provider.startSession(
-      pcId: pc.id,
-      kode: kode,
-      password: sandi,
-    );
+    final err = await provider.startSession(pcId: pc.id, kode: kode);
     if (!context.mounted) return;
-    _toast(
-      context,
-      ok ? 'Sesi dimulai di ${pc.namaPc}.' : 'Gagal memulai sesi.',
-      ok,
+    _toast(context, err ?? 'Sesi dimulai di ${pc.namaPc}.', err == null);
+  }
+
+  Future<void> _confirmEnd(
+    BuildContext context,
+    PcProvider provider,
+  ) async {
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Akhiri sesi di PC ini?'),
+        content: Text(
+          pc.hasSession
+              ? 'Akun ${pc.session!.displayName} akan dilepas, layar PC '
+                  'dikunci, dan sisa waktu dikembalikan ke akun.'
+              : 'Tidak ada sesi berjalan. Layar PC akan dikunci.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.idle),
+            child: const Text('Akhiri'),
+          ),
+        ],
+      ),
     );
-  }
-
-  void _toast(BuildContext context, String msg, bool ok) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          backgroundColor: ok ? AppColors.active : AppColors.danger,
-        ),
-      );
-  }
-
-  void _run(BuildContext context, Future<bool> future, String label) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    future.then((ok) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(ok ? 'Aksi $label berhasil.' : 'Aksi $label gagal.'),
-          backgroundColor: ok ? AppColors.active : AppColors.danger,
-        ),
-      );
-    });
+    if (yes == true && context.mounted) {
+      _run(context, () => provider.endSession(pc.id), 'Akhiri Sesi');
+    }
   }
 
   Future<void> _confirmShutdown(
@@ -267,8 +292,31 @@ class PcCard extends StatelessWidget {
       ),
     );
     if (yes == true && context.mounted) {
-      _run(context, provider.shutdown(pc.id), 'Matikan');
+      _run(context, () => provider.shutdown(pc.id), 'Matikan');
     }
+  }
+
+  void _run(
+    BuildContext context,
+    Future<String?> Function() action,
+    String label,
+  ) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    action().then((err) {
+      if (!context.mounted) return;
+      _toast(context, err ?? 'Aksi $label berhasil.', err == null);
+    });
+  }
+
+  void _toast(BuildContext context, String msg, bool ok) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: ok ? AppColors.active : AppColors.danger,
+        ),
+      );
   }
 }
 

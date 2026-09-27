@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'core/network/api_client.dart';
+import 'core/network/socket_service.dart';
 import 'core/router/app_shell.dart';
 import 'core/storage/secure_store.dart';
 import 'core/theme/app_theme.dart';
@@ -32,17 +33,20 @@ class V3NetbillApp extends StatelessWidget {
     // supaya token hanya dibaca satu kali dan tidak ada dua salinan.
     final secureStore = SecureStore();
     final api = ApiClient(secureStore: secureStore);
+    // Satu Socket.IO dipakai bersama oleh seluruh aplikasi.
+    final socket = SocketService(secureStore);
 
     return MultiProvider(
       providers: [
         Provider<SecureStore>.value(value: secureStore),
         Provider<ApiClient>.value(value: api),
+        Provider<SocketService>.value(value: socket),
         ChangeNotifierProvider(
           create: (_) =>
               AuthProvider(AuthRepository(api, secureStore))..bootstrap(),
         ),
         ChangeNotifierProvider(
-          create: (_) => PcProvider(PcRepository(api)),
+          create: (_) => PcProvider(PcRepository(api, socket), socket),
         ),
         ChangeNotifierProvider(
           create: (_) => AccountsProvider(AccountRepository(api)),

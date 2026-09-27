@@ -26,9 +26,7 @@ class _PcListPageState extends State<PcListPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PcProvider>()
-        ..load()
-        ..startPolling();
+      context.read<PcProvider>().init();
     });
   }
 
@@ -40,7 +38,7 @@ class _PcListPageState extends State<PcListPage>
     return RefreshIndicator(
       color: AppColors.primary,
       backgroundColor: AppColors.bgCard,
-      onRefresh: () => pc.load(silent: true),
+      onRefresh: () => pc.load(),
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(

@@ -23,8 +23,9 @@ dependencies:
   # Format angka dan tanggal gaya Indonesia
   intl: ^0.19.0
 
-  # Realtime (WebSocket) untuk status PC
-  web_socket_channel: ^3.0.1
+  # Socket.IO untuk aksi PC dan status realtime. Backend memakai Socket.IO,
+  # jadi web_socket_channel biasa tidak bisa dipakai karena Different protocol.
+  socket_io_client: ^2.0.3
 
 dev_dependencies:
   flutter_test:

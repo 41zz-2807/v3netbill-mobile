@@ -32,6 +32,40 @@ enum PcStatus {
   }
 }
 
+/// Sesi yang sedang berjalan di sebuah PC.
+///
+/// Datanya dikirim backend lewat `dashboard:pc_update` dan endpoint
+/// `GET /pcs` (yang lebih sederhana, tanpa `session`).
+class PcSession {
+  const PcSession({
+    this.kodeUnik,
+    this.nama,
+    this.tipe,
+    this.sisaDetik = 0,
+  });
+
+  final String? kodeUnik;
+  final String? nama;
+  final String? tipe;
+  final int sisaDetik;
+
+  /// Nama akun yang dipakai sesi ini.
+  String get displayName {
+    if (nama != null && nama!.isNotEmpty) return nama!;
+    if (kodeUnik != null && kodeUnik!.isNotEmpty) return kodeUnik!;
+    return '-';
+  }
+
+  factory PcSession.fromJson(Map<String, dynamic> json) {
+    return PcSession(
+      kodeUnik: json['kodeUnik']?.toString(),
+      nama: json['nama']?.toString(),
+      tipe: json['tipe']?.toString(),
+      sisaDetik: (json['sisaDetik'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 /// Data satu PC.
 class Pc {
   const Pc({
@@ -40,6 +74,7 @@ class Pc {
     required this.status,
     this.ipClient,
     this.lastHeartbeatAt,
+    this.session,
   });
 
   final String id;
@@ -49,8 +84,12 @@ class Pc {
   /// Hanya data tampilan, bukan identitas PC.
   final String? ipClient;
   final DateTime? lastHeartbeatAt;
+  final PcSession? session;
+
+  bool get hasSession => session != null;
 
   factory Pc.fromJson(Map<String, dynamic> json) {
+    final sess = json['session'];
     return Pc(
       id: json['id']?.toString() ?? '',
       namaPc: json['namaPc']?.toString() ?? json['nama']?.toString() ?? '-',
@@ -59,6 +98,9 @@ class Pc {
       lastHeartbeatAt: DateTime.tryParse(
         json['lastHeartbeatAt']?.toString() ?? '',
       ),
+      session: sess is Map
+          ? PcSession.fromJson(Map<String, dynamic>.from(sess))
+          : null,
     );
   }
 

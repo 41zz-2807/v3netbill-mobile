@@ -179,13 +179,14 @@ class StatCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
+          // Bar proporsi statis, bukan animasi. Nilai null pada
+          // LinearProgressIndicator membuat bar berjalan terus tanpa
+          // menampilkan apa pun, yang justru mengganggu mata.
           ClipRRect(
             borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              value: null,
-              minHeight: 4,
-              backgroundColor: color.withValues(alpha: 0.14),
-              valueColor: AlwaysStoppedAnimation(color),
+            child: Container(
+              height: 4,
+              color: color.withValues(alpha: 0.14),
             ),
           ),
         ],

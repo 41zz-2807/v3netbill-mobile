@@ -93,24 +93,36 @@ class AccountsProvider extends ChangeNotifier {
   }
 
   Future<bool> createVoucher(int nominal) => _mutate(
-        () => _repo.createVoucher(nominal: nominal),
+        () async {
+          await _repo.createVoucher(nominal: nominal);
+        },
         'Gagal membuat voucher.',
       );
 
-  Future<bool> createMember({required String nama, required int nominal}) =>
+  Future<bool> createMember({
+    required String nama,
+    required String password,
+    required int nominal,
+  }) =>
       _mutate(
-        () => _repo.createMember(nama: nama, nominal: nominal),
+        () async {
+          await _repo.createMember(
+            nama: nama,
+            password: password,
+            nominal: nominal,
+          );
+        },
         'Gagal membuat member.',
       );
 
   Future<bool> topupSelected(int amount) => _mutateSelected(
-        (id) => _repo.topup(accountId: id, amount: amount),
+        (id) => _repo.topup(accountId: id, nominal: amount),
         'Gagal topup.',
       );
 
   Future<bool> withdrawSelected(int amount) => _mutateSelected(
-        (id) => _repo.withdraw(accountId: id, amount: amount),
-        'Gagal tarik saldo.',
+        (id) => _repo.correct(accountId: id, nominal: amount),
+        'Gagal menarik saldo.',
       );
 
   Future<bool> revokeSelected() => _mutateSelected(

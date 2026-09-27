@@ -23,9 +23,7 @@ class _DashboardPageState extends State<DashboardPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PcProvider>()
-        ..load()
-        ..startPolling();
+      context.read<PcProvider>().init();
     });
   }
 
@@ -37,7 +35,7 @@ class _DashboardPageState extends State<DashboardPage>
     return RefreshIndicator(
       color: AppColors.primary,
       backgroundColor: AppColors.bgCard,
-      onRefresh: () => pc.load(silent: true),
+      onRefresh: () => pc.load(),
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -55,7 +53,7 @@ class _DashboardPageState extends State<DashboardPage>
                       ),
                     ),
                   ),
-                  _LiveDot(connected: pc.error == null),
+                  _LiveDot(connected: pc.realtime),
                 ],
               ),
             ),

@@ -4,127 +4,117 @@ import '../../../core/network/api_exception.dart';
 import '../models/account.dart';
 
 /// Sumber data voucher dan member.
+///
+/// Semua endpoint di sini sudah dibaca langsung dari backend, jadi nama path
+/// dan nama field-nya bukan tebakan:
+///
+/// - `POST /accounts/voucher`  body `{ nominal }`
+/// - `POST /accounts/member`   body `{ nama, password, nominal }`
+/// - `POST /accounts/:id/topup`    body `{ nominal }`
+/// - `POST /accounts/:id/koreksi`  body `{ nominal }`
+/// - `POST /accounts/:id/revoke`    tanpa body
+///
+/// Backend mewajibkan `nominal` kelipatan 500 dengan nilai minimal 500.
 class AccountRepository {
   AccountRepository(this._api);
 
   final ApiClient _api;
 
-  /// Ambil semua akun. Pencarian dikirim ke server lewat [search], dan
-  /// [AccountRepository.filterLocally] dipakai sebagai cadangan supaya
-  /// pencarian tetap jalan walau server tidak mendukungnya.
-  ///
-  /// PERLU DIKONFIRMASI: nama parameter pencarian di backend belum dipastikan
-  /// (kandidat `q`, `q`, atau `search`). Yang sudah pasti ada `limit`.
-  /// Kalau ternyata berbeda, cukup ganti nama key-nya satu baris di bawah.
-  Future<List<Account>> fetchAll({
-    String? search,
-    AccountType? type,
-    int limit = 200,
-  }) async {
+  static const minNominal = 500;
+
+  /// Ambil semua akun. Pencarian difilter di sisi klien karena backend
+  /// hanya menerima `tipe` dan `status` sebagai query, bukan kata kunci.
+  Future<List<Account>> fetchAll(
+      {AccountType? type, AccountStatus? status}) async {
     final data = await _api.get(
       ApiConfig.accounts,
       query: {
-        'limit': limit,
-        if (search != null && search.trim().isNotEmpty) 'q': search.trim(),
+        if (type != null) 'tipe': type.wire,
+        if (status != null) 'status': status.wire,
       },
     );
     if (data is! List) {
       throw ApiException('Format jawaban akun tidak dikenali.');
     }
-    var list = data
+    return data
         .whereType<Map>()
         .map((e) => Account.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
-
-    if (type != null) {
-      list = list.where((a) => a.tipe == type).toList();
-    }
-    return filterLocally(list, search);
+        .toList(growable: false);
   }
 
-  /// Pencarian di sisi klien, dipakai sebagai cadangan.
-  static List<Account> filterLocally(List<Account> list, String? search) {
-    final q = search?.trim().toLowerCase() ?? '';
-    if (q.isEmpty) return list;
-    return list
-        .where((a) =>
-            a.displayName.toLowerCase().contains(q) ||
-            (a.nama?.toLowerCase().contains(q) ?? false))
-        .toList();
-  }
-
-  /// Buat voucher baru.
-  ///
-  /// PERLU DIKONFIRMASI: nama field body belum dipastikan. Yang sudah pasti
-  /// dari aturan bisnis backend: `nominal` harus kelipatan 500, dan sisa
-  /// waktu dihitung dari `nominal / harga_per_menit`.
+  /// Buat voucher baru. Sisa waktu dihitung backend dari nominal.
   Future<Account> createVoucher({required int nominal}) async {
+    _validasiNominal(nominal);
     final data = await _api.post(
-      ApiConfig.accounts,
-      data: {
-        'tipe': 'VOUCHER',
-        'nominal': nominal,
-      },
+      '${ApiConfig.accounts}/voucher',
+      data: {'nominal': nominal},
     );
     return Account.fromJson(Map<String, dynamic>.from(data as Map));
   }
 
   /// Buat member baru.
   ///
-  /// PERLU DIKONFIRMASI: sama seperti [createVoucher], nama field belum
-  /// dipastikan. Untuk member, `nominal` berarti saldo awal.
+  /// Member wajib punya password karena kasir membukanya dari halaman
+  /// kasir, dan backend mewajibkan panjang minimal 4 karakter.
   Future<Account> createMember({
     required String nama,
+    required String password,
     required int nominal,
   }) async {
+    _validasiNominal(nominal);
+    if (nama.trim().isEmpty) {
+      throw ApiException('Nama member wajib diisi.');
+    }
+    if (password.length < 4) {
+      throw ApiException('Password member minimal 4 karakter.');
+    }
     final data = await _api.post(
-      ApiConfig.accounts,
-      data: {
-        'tipe': 'MEMBER',
-        'nama': nama,
-        'nominal': nominal,
-      },
+      '${ApiConfig.accounts}/member',
+      data: {'nama': nama.trim(), 'password': password, 'nominal': nominal},
     );
     return Account.fromJson(Map<String, dynamic>.from(data as Map));
   }
 
-  /// Tambah saldo / tambah waktu.
-  ///
-  /// PERLU DIKONFIRMASI: endpoint dan body belum dipastikan. Yang jelas dari
-  /// aplikasi web: aksi ini memakai dropdown "Topup" dan tercatat sebagai
-  /// transaksi bertipe `TOPUP`.
-  Future<void> topup({
-    required String accountId,
-    required int amount,
-  }) async {
-    await _api.post(
-      '${ApiConfig.accounts}/$accountId/topup',
-      data: {'nominal': amount},
-    );
+  /// Tambah saldo atau tambah waktu.
+  Future<void> topup({required String accountId, required int nominal}) async {
+    _validasiNominal(nominal);
+    await _api.post('${ApiConfig.accounts}/$accountId/topup',
+        data: {'nominal': nominal});
   }
 
-  /// Kurangi saldo / tarik waktu.
-  ///
-  /// PERLU DIKONFIRMASI: lihat catatan di [topup].
-  Future<void> withdraw({
-    required String accountId,
-    required int amount,
-  }) async {
-    await _api.post(
-      '${ApiConfig.accounts}/$accountId/withdraw',
-      data: {'nominal': amount},
-    );
+  /// Kurangi saldo. Backend menyebutnya koreksi, jadi itu transaksi
+  /// pengurangan yang tercatat di riwayat, bukan sekadar mengubah angka.
+  Future<void> correct(
+      {required String accountId, required int nominal}) async {
+    _validasiNominal(nominal);
+    await _api.post('${ApiConfig.accounts}/$accountId/koreksi',
+        data: {'nominal': nominal});
   }
 
-  /// Nonaktifkan akun (revoke).
-  ///
-  /// PERLU DIKONFIRMASI: aplikasi web memakai aksi "Revoke" yang
-  /// kemungkinan besar memanggil `PATCH /accounts/:id` dengan
-  /// `{ status: 'REVOKED' }`.
+  /// Nonaktifkan akun.
   Future<void> revoke(String accountId) async {
-    await _api.patch(
-      '${ApiConfig.accounts}/$accountId',
-      data: {'status': 'REVOKED'},
-    );
+    await _api.post('${ApiConfig.accounts}/$accountId/revoke');
+  }
+
+  void _validasiNominal(int nominal) {
+    if (nominal < minNominal) {
+      throw ApiException('Nominal minimal Rp $minNominal.');
+    }
+    if (nominal % minNominal != 0) {
+      throw ApiException('Nominal harus kelipatan Rp $minNominal.');
+    }
+  }
+
+  /// Pencarian di sisi klien, dipakai untuk memfilter hasil [fetchAll].
+  static List<Account> filterLocally(List<Account> list, String? search) {
+    final q = search?.trim().toLowerCase() ?? '';
+    if (q.isEmpty) return list;
+    return list
+        .where(
+          (a) =>
+              a.displayName.toLowerCase().contains(q) ||
+              (a.nama?.toLowerCase().contains(q) ?? false),
+        )
+        .toList();
   }
 }

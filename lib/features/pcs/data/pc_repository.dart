@@ -1,21 +1,26 @@
 import '../../../core/config/api_config.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/network/socket_service.dart';
 import '../models/pc.dart';
 
 /// Sumber data PC.
 ///
-/// Catatan penting: di aplikasi web, aksi PC (kunci, matikan) dikirim lewat
-/// WebSocket (`dashboard:lock_pc` dan `dashboard:shutdown_pc`), bukan REST.
-/// Peta ini ditulis memakai REST lebih dulu karena jauh lebih sederhana.
-/// Kalau ternyata backend web menyediakan REST-nya, cukup ganti isi method
-/// di bawah tanpa menyentuh widget sama sekali.
+/// Pembagian tanggung jawabnya penting dan sudah mengikuti backend:
+///
+/// - **Daftar PC** diambil lewat REST `GET /pcs`, karena itu endpoint-nya
+///   benar-benar ada.
+/// - **Aksi PC** (mulai sesi, kunci, matikan) dan **status realtime** lewat
+///   Socket.IO, karena backend hanya menyediakan perintah itu lewat socket
+///   (`dashboard:start_pc`, `dashboard:lock_pc`, `dashboard:shutdown_pc`).
+///   Dicoba lewat REST lebih dulu dan memang tidak ada, jadi tidak dikarang.
 class PcRepository {
-  PcRepository(this._api);
+  PcRepository(this._api, this._socket);
 
   final ApiClient _api;
+  final SocketService _socket;
 
-  /// Ambil daftar semua PC.
+  /// Ambil daftar semua PC lewat REST.
   Future<List<Pc>> fetchAll() async {
     final data = await _api.get(ApiConfig.pcs);
     if (data is! List) {
@@ -29,39 +34,29 @@ class PcRepository {
 
   /// Mulai sesi di PC dengan kode voucher atau member.
   ///
-  /// PERLU DIKONFIRMASI: nama endpoint dan bentuk body belum dipastikan.
-  /// Aplikasi web memakai socket `client:login_request` dengan
-  /// `{ pcId, agentToken, kode, password }`. Yang mana yang benar untuk REST
-  /// harus dicek ke backend sebelum fitur ini dipakai.
-  Future<void> startSession({
+  /// Backend hanya meminta kode, tanpa password, karena proses ini dilakukan
+  /// dari sisi operator dan bukan dari layar PC.
+  Future<SocketResult> startSession({
     required String pcId,
     required String kode,
-    required String password,
-  }) async {
-    await _api.post(
-      '${ApiConfig.pcs}/$pcId/session',
-      data: {'kode': kode, 'password': password},
-    );
+  }) {
+    return _socket.startPc(pcId: pcId, kode: kode);
   }
 
-  /// Hentikan sesi yang sedang berjalan.
+  /// Akhiri sesi yang sedang berjalan.
   ///
-  /// PERLU DIKONFIRMASI: lihat catatan di [startSession].
-  Future<void> stopSession(String pcId) async {
-    await _api.post('${ApiConfig.pcs}/$pcId/session/stop');
-  }
+  /// Backend tidak menyediakan perintah stop khusus untuk operator. Yang
+  /// dipakai adalah `dashboard:lock_pc`, yang di server memanggil
+  /// `unlockPc`, jadi sesi berakhir dan layar PC ikut terkunci.
+  ///
+  /// Perintah `client:stop_session` yang terdengar lebih umum sebenarnya
+  /// hanya untuk agent di dalam PC, karena brutally memerlukan pcId dan
+  /// agentToken pada handshake.
+  Future<SocketResult> endSession(String pcId) => _socket.lockPc(pcId);
 
   /// Kunci layar PC.
-  ///
-  /// PERLU DIKONFIRMASI: aplikasi web memakai socket `dashboard:lock_pc`.
-  Future<void> lock(String pcId) async {
-    await _api.post('${ApiConfig.pcs}/$pcId/lock');
-  }
+  Future<SocketResult> lock(String pcId) => _socket.lockPc(pcId);
 
   /// Matikan atau shutdown PC.
-  ///
-  /// PERLU DIKONFIRMASI: aplikasi web memakai socket `dashboard:shutdown_pc`.
-  Future<void> shutdown(String pcId) async {
-    await _api.post('${ApiConfig.pcs}/$pcId/shutdown');
-  }
+  Future<SocketResult> shutdown(String pcId) => _socket.shutdownPc(pcId);
 }
