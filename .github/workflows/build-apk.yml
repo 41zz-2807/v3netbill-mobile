@@ -1,0 +1,77 @@
+name: Build APK
+
+# Build APK otomatis dan simpan sebagai artifact supaya bisa diunduh dari tab
+# Actions tanpa perlu akses ke server.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.4
+          cache: true
+
+      - name: Tampilkan versi
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Ambil dependensi
+        run: flutter pub get
+
+      - name: Analisis statis
+        # --fatal-infos dimatikan supaya warning gaya kode tidak menggagalkan
+        # build. Error tetap membuat build gagal.
+        run: flutter analyze --no-pub --no-fatal-infos
+
+      - name: Jalankan test
+        run: flutter test --no-pub
+
+      - name: Build APK release
+        run: |
+          flutter build apk --release --split-per-abi \
+            --dart-define=API_BASE_URL=https://v3netbill.bilmary.my.id/api \
+            --dart-define=API_WS_URL=wss://v3netbill.bilmary.my.id/socket.io
+
+      - name: Kumpulkan APK
+        run: |
+          mkdir -p apk
+          # build/app/outputs/flutter-apk/*.apk
+          cp build/app/outputs/flutter-apk/*.apk apk/ 2>/dev/null || true
+          # APK per-ABI ada di direktori ini pada Flutter versi terbaru
+          find build -name "*.apk" -exec cp {} apk/ \; 2>/dev/null || true
+          ls -la apk/
+
+      - name: Unggah APK sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v3netbill-apk
+          path: apk/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Ringkasan
+        if: always()
+        run: |
+          echo "### APK ###"
+          ls -la apk/ 2>/dev/null || echo "tidak ada APK"
