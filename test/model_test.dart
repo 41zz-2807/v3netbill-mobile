@@ -23,6 +23,47 @@ void main() {
     });
   });
 
+  group('Pc heartbeat', () {
+    Pc pcDenganJeda(int detik) => Pc(
+          id: 'p1',
+          namaPc: 'PC001',
+          status: PcStatus.idle,
+          lastHeartbeatAt: DateTime.now().subtract(Duration(seconds: detik)),
+        );
+
+    test('sehat kalau heartbeat di bawah ambang 30 detik', () {
+      expect(pcDenganJeda(0).heartbeatSehat, isTrue);
+      expect(pcDenganJeda(29).heartbeatSehat, isTrue);
+    });
+
+    test('tidak sehat tepat di ambang dan lewat ambang', () {
+      expect(pcDenganJeda(30).heartbeatSehat, isFalse);
+      expect(pcDenganJeda(600).heartbeatSehat, isFalse);
+    });
+
+    test('belum pernah heartbeat dianggap tidak sehat', () {
+      const tanpaHeartbeat = Pc(
+        id: 'p2',
+        namaPc: 'PC002',
+        status: PcStatus.idle,
+      );
+      expect(tanpaHeartbeat.detikSejakHeartbeat, isNull);
+      expect(tanpaHeartbeat.heartbeatSehat, isFalse);
+    });
+
+    test('detik sejak heartbeat tidak pernah negatif', () {
+      // Jam agent bisa sedikit meleset ke depan karena perbedaan waktu.
+      final pc = Pc(
+        id: 'p3',
+        namaPc: 'PC003',
+        status: PcStatus.idle,
+        lastHeartbeatAt: DateTime.now().add(const Duration(minutes: 5)),
+      );
+      expect(pc.detikSejakHeartbeat, 0);
+      expect(pc.heartbeatSehat, isTrue);
+    });
+  });
+
   group('Account', () {
     test('menampilkan kode untuk voucher dan nama untuk member', () {
       const voucher = Account(

@@ -41,6 +41,14 @@ class PcCard extends StatelessWidget {
       PcStatus.offline => (AppColors.danger, AppColors.dangerSoft),
     };
 
+    // Ikon di samping nama PC dipakai dua purposes sekaligus. Kalau agent PC
+    // masih heartbeat dalam 30 detik terakhir, ikon jadi hijau karena itu
+    // tanda koneksinya benar-benar sehat. Kalau sudah lama tidak heartbeat,
+    // warna kembali mengikuti status PC supaya informasi statusnya tidak hilang.
+    final (warnaIkon, warnaLatar) = pc.heartbeatSehat
+        ? (AppColors.active, AppColors.activeSoft)
+        : (color, soft);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -57,10 +65,10 @@ class PcCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: soft,
+                  color: warnaLatar,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.computer, size: 20, color: color),
+                child: Icon(Icons.computer, size: 20, color: warnaIkon),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -141,24 +149,9 @@ class PcCard extends StatelessWidget {
           ],
 
           const SizedBox(height: 12),
-          // Heartbeat cukup ditampilkan sebagai icon, tanpa tulisan, supaya
-          // kartu tidak bertambah tinggi. Ikon hijau berarti agent PC masih
-          // heartbeat dalam 30 detik terakhir. Keterangan penuhnya ada di
-          // tooltip karena di layar kecil teksnya memenuhi baris sendiri.
-          Tooltip(
-            message: pc.detikSejakHeartbeat == null
-                ? 'Belum pernah heartbeat'
-                : 'Heartbeat ${pc.detikSejakHeartbeat} detik lalu',
-            child: Icon(
-              Icons.computer,
-              size: 15,
-              color: pc.heartbeatSehat ? AppColors.active : AppColors.textMuted,
-            ),
-          ),
-          const SizedBox(height: 12),
-
 
           // Aksi utama
+
           SizedBox(
             width: double.infinity,
             child: PcActionButton(

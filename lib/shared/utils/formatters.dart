@@ -42,15 +42,4 @@ class Formatters {
       d == null ? '-' : _dateShort.format(d.toLocal());
   static String time(DateTime? d) =>
       d == null ? '-' : _time.format(d.toLocal());
-
-  /// Waktu relatif sederhana untuk "terakhir heartbeat".
-  static String relative(DateTime? d) {
-    if (d == null) return '-';
-    final now = DateTime.now();
-    final selisih = now.difference(d.toLocal());
-    if (selisih.inSeconds < 60) return '${selisih.inSeconds} detik lalu';
-    if (selisih.inMinutes < 60) return '${selisih.inMinutes} menit lalu';
-    if (selisih.inHours < 24) return '${selisih.inHours} jam lalu';
-    return '${selisih.inDays} hari lalu';
-  }
 }
