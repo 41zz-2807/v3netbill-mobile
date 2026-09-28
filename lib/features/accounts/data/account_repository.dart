@@ -88,6 +88,23 @@ class AccountRepository {
         data: {'nominal': nominal});
   }
 
+  /// Ganti password satu akun.
+  ///
+  /// Sama seperti yang dipakai halaman web: operator berwenang mengubah
+  /// password tanpa perlu password lama, jadi hanya perlu password baru.
+  Future<void> changePassword({
+    required String accountId,
+    required String password,
+  }) async {
+    if (password.length < 4) {
+      throw ApiException('Password baru minimal 4 karakter.');
+    }
+    await _api.patch(
+      '${ApiConfig.accounts}/$accountId/password',
+      data: {'password': password},
+    );
+  }
+
   /// Nonaktifkan akun.
   Future<void> revoke(String accountId) async {
     await _api.post('${ApiConfig.accounts}/$accountId/revoke');

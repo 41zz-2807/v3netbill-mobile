@@ -123,6 +123,7 @@ class _AccountsPageState extends State<AccountsPage>
                       hint: 'Nominal yang ditarik (kelipatan 500)',
                       onSubmit: (v) => p.withdrawSelected(v),
                     ),
+                    onChangePassword: () => _gantiPassword(context, p),
                     onRevoke: () => _confirmRevoke(context, p),
                   ),
           ),
@@ -199,6 +200,103 @@ class _AccountsPageState extends State<AccountsPage>
 
     if (!context.mounted) return;
     _toast(context, ok ? 'Berhasil dibuat.' : 'Gagal membuat.', ok);
+  }
+
+  /// Ganti password satu akun yang dipilih.
+  ///
+  /// Dipakai operator, jadi tidak perlu password lama — sama seperti aksi
+  /// ubah password di halaman web. Kolom ulangan dipakai supaya salah ketik
+  /// tidak sampai terkirim.
+  Future<void> _gantiPassword(
+    BuildContext context,
+    AccountsProvider p,
+  ) async {
+    if (p.selectedCount != 1) {
+      _toast(context, 'Pilih tepat satu akun untuk ganti password.', false);
+      return;
+    }
+
+    final baruCtrl = TextEditingController();
+    final ulangCtrl = TextEditingController();
+
+    final submit = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Ganti Password Akun',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Berlaku untuk pelanggan. Kosongkan password lama di komputer bila ingin menyamarkan.',
+              style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: baruCtrl,
+              obscureText: true,
+              style: const TextStyle(color: AppColors.textPrimary),
+              decoration: const InputDecoration(
+                labelText: 'Password baru',
+                prefixIcon: Icon(Icons.lock_outline, size: 20),
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: ulangCtrl,
+              obscureText: true,
+              style: const TextStyle(color: AppColors.textPrimary),
+              decoration: const InputDecoration(
+                labelText: 'Ulangi password baru',
+                prefixIcon: Icon(Icons.lock_reset_outlined, size: 20),
+              ),
+            ),
+            const SizedBox(height: 22),
+            ElevatedButton(
+              onPressed: () {
+                final a = baruCtrl.text.trim();
+                if (a.length < 4) return;
+                if (a != ulangCtrl.text.trim()) return;
+                Navigator.pop(ctx, true);
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (submit != true || !context.mounted) return;
+
+    final baru = baruCtrl.text.trim();
+    if (baru.length < 4) {
+      _toast(context, 'Password baru minimal 4 karakter.', false);
+      return;
+    }
+    if (baru != ulangCtrl.text.trim()) {
+      _toast(context, 'Ulangi password tidak sama.', false);
+      return;
+    }
+
+    final id = p.selected.first;
+    final ok = await p.changePasswordOne(id, baru);
+    if (!context.mounted) return;
+    _toast(context, ok ? 'Password diganti.' : 'Gagal mengganti password.', ok);
   }
 
   Future<void> _askAmount(
@@ -373,6 +471,7 @@ class _SelectionBar extends StatelessWidget {
     required this.onTopup,
     required this.onWithdraw,
     required this.onRevoke,
+    required this.onChangePassword,
   });
 
   final int count;
@@ -380,6 +479,7 @@ class _SelectionBar extends StatelessWidget {
   final VoidCallback onTopup;
   final VoidCallback onWithdraw;
   final VoidCallback onRevoke;
+  final VoidCallback onChangePassword;
 
   @override
   Widget build(BuildContext context) {
@@ -406,6 +506,8 @@ class _SelectionBar extends StatelessWidget {
           _chip(Icons.remove, 'Tarik', onWithdraw),
           const SizedBox(width: 6),
           _chip(Icons.block, 'Revoke', onRevoke),
+          const SizedBox(width: 6),
+          _chip(Icons.lock_outline, 'Password', onChangePassword),
           IconButton(
             onPressed: onClear,
             icon: const Icon(Icons.close, size: 18),

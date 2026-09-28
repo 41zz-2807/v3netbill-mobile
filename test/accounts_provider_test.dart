@@ -66,6 +66,12 @@ class _FakeAccountRepository implements AccountRepository {
   Future<void> correct({required String accountId, required int nominal}) async {}
 
   @override
+  Future<void> changePassword({
+    required String accountId,
+    required String password,
+  }) async {}
+
+  @override
   Future<void> revoke(String accountId) async {}
 }
 

@@ -155,6 +155,15 @@ class AccountsProvider extends ChangeNotifier {
         'Gagal menarik saldo.',
       );
 
+  /// Ganti password satu akun yang dipilih.
+  ///
+  /// Hanya berlaku kalau tepat satu akun yang dipilih, karena endpoint
+  /// mengganti password bekerja per akun.
+  Future<bool> changePasswordOne(String id, String password) => _mutate(
+        () => _repo.changePassword(accountId: id, password: password),
+        'Gagal mengganti password.',
+      );
+
   Future<bool> revokeSelected() => _mutateSelected(
         (id) => _repo.revoke(id),
         'Gagal menonaktifkan akun.',
