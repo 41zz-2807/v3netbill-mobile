@@ -19,7 +19,8 @@ class _FixtureRepo implements AccountRepository {
   final List<Account> akun;
 
   @override
-  Future<List<Account>> fetchAll({AccountType? type, AccountStatus? status}) async {
+  Future<List<Account>> fetchAll(
+      {AccountType? type, AccountStatus? status}) async {
     if (type == null) return akun;
     return akun.where((a) => a.tipe == type).toList();
   }
@@ -38,7 +39,8 @@ class _FixtureRepo implements AccountRepository {
   Future<void> topup({required String accountId, required int nominal}) async {}
 
   @override
-  Future<void> correct({required String accountId, required int nominal}) async {}
+  Future<void> correct(
+      {required String accountId, required int nominal}) async {}
 
   @override
   Future<void> changePassword({
@@ -57,7 +59,8 @@ List<Account> _muatFixture() {
       .toList();
 }
 
-Widget _app(AccountsProvider p) => ChangeNotifierProvider<AccountsProvider>.value(
+Widget _app(AccountsProvider p) =>
+    ChangeNotifierProvider<AccountsProvider>.value(
       value: p,
       child: const MaterialApp(home: Scaffold(body: AccountsPage())),
     );
@@ -78,9 +81,8 @@ void main() {
         reason: 'layar kosong padahal ada ${semua.length} akun');
 
     // Kode voucher dari data nyata harus muncul di layar.
-    final kodeVoucher = semua
-        .firstWhere((a) => a.tipe == AccountType.voucher)
-        .kodeUnik!;
+    final kodeVoucher =
+        semua.firstWhere((a) => a.tipe == AccountType.voucher).kodeUnik!;
     expect(find.textContaining(kodeVoucher), findsWidgets,
         reason: 'kode voucher dari server tidak tampil');
   });
@@ -101,11 +103,41 @@ void main() {
 
     expect(p.selectedCount, 1,
         reason: 'ketukan tidak menandai akun sebagai terpilih');
-    expect(find.textContaining('Topup'), findsWidgets,
-        reason: 'tombol Topup tidak muncul setelah memilih');
-    expect(find.textContaining('Tarik'), findsWidgets,
-        reason: 'tombol Tarik tidak muncul setelah memilih');
-    expect(find.textContaining('Revoke'), findsWidgets,
-        reason: 'tombol Revoke tidak muncul setelah memilih');
+
+    // Tombol aksi sekarang ikon saja tanpa keterangan, jadi dicari lewat ikon.
+    // Label teksnya pindah ke tooltip, yang tidak dirender sampai dipanggil.
+    for (final ikon in [
+      Icons.add,
+      Icons.remove,
+      Icons.block,
+      Icons.lock_outline,
+      Icons.close,
+    ]) {
+      expect(find.byIcon(ikon), findsWidgets,
+          reason: 'ikon $ikon tidak muncul setelah memilih');
+    }
+    expect(find.textContaining('dipilih'), findsNothing,
+        reason: 'tulisan jumlah terpilih harus dihapus');
+  });
+
+  testWidgets('bar aksi tidak meluber di layar HP 390 px',
+      (WidgetTester tester) async {
+    // Lebar HP yang paling umum. Bar versi lama meluber 261 px di lebar ini.
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+
+    final semua = _muatFixture();
+    final p = AccountsProvider(_FixtureRepo(semua));
+    await p.load();
+
+    await tester.pumpWidget(_app(p));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(Checkbox).first);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull,
+        reason: 'bar aksi meluber di layar HP');
   });
 }

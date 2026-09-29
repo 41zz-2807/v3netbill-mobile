@@ -109,7 +109,6 @@ class _AccountsPageState extends State<AccountsPage>
             child: p.selectedCount == 0
                 ? const SizedBox(width: double.infinity)
                 : _SelectionBar(
-                    count: p.selectedCount,
                     onClear: p.clearSelection,
                     onTopup: () => _askAmount(
                       context,
@@ -464,9 +463,13 @@ class _TabBar extends StatelessWidget {
 }
 
 /// Bar aksi yang muncul saat ada akun dipilih.
+///
+/// Tombolnya ikon saja tanpa keterangan. Bar versi lama memakai teks "N dipilih"
+/// ditambah empat chip berlabel, dan total lebarnya melebihi layar HP — Flutter
+/// melaporkan "RenderFlex overflowed by 261 pixels" pada lebar 390 px. Ikon dengan
+/// tooltip menjaga bar ini muat di layar sempit tanpa kehilangan arti.
 class _SelectionBar extends StatelessWidget {
   const _SelectionBar({
-    required this.count,
     required this.onClear,
     required this.onTopup,
     required this.onWithdraw,
@@ -474,7 +477,6 @@ class _SelectionBar extends StatelessWidget {
     required this.onChangePassword,
   });
 
-  final int count;
   final VoidCallback onClear;
   final VoidCallback onTopup;
   final VoidCallback onWithdraw;
@@ -485,66 +487,30 @@ class _SelectionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         gradient: AppColors.brandGradientSoft,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text(
-            '$count dipilih',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const Spacer(),
-          _chip(Icons.add, 'Topup', onTopup),
-          const SizedBox(width: 6),
-          _chip(Icons.remove, 'Tarik', onWithdraw),
-          const SizedBox(width: 6),
-          _chip(Icons.block, 'Revoke', onRevoke),
-          const SizedBox(width: 6),
-          _chip(Icons.lock_outline, 'Password', onChangePassword),
-          IconButton(
-            onPressed: onClear,
-            icon: const Icon(Icons.close, size: 18),
-            color: Colors.white70,
-            tooltip: 'Batalkan pilihan',
-            visualDensity: VisualDensity.compact,
-          ),
+          _ikon(Icons.add, 'Topup', onTopup),
+          _ikon(Icons.remove, 'Tarik', onWithdraw),
+          _ikon(Icons.block, 'Revoke', onRevoke),
+          _ikon(Icons.lock_outline, 'Password', onChangePassword),
+          _ikon(Icons.close, 'Batalkan pilihan', onClear),
         ],
       ),
     );
   }
 
-  Widget _chip(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 13, color: Colors.white),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
+  Widget _ikon(IconData icon, String tooltip, VoidCallback onTap) {
+    return IconButton(
+      onPressed: onTap,
+      icon: Icon(icon, size: 22, color: Colors.white),
+      tooltip: tooltip,
+      visualDensity: VisualDensity.compact,
     );
   }
 }
