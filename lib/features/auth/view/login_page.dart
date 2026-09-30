@@ -191,7 +191,8 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 22),
                       const Text(
-                        'v3Netbill',
+                        'v3Netbill - Powered By Smart-Plus.id',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 12,

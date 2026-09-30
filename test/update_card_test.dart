@@ -29,6 +29,21 @@ class _FakeApkRepository implements ApkRepository {
   }
 }
 
+class _GagalRepository implements ApkRepository {
+  @override
+  Future<InfoApk> cekInfo() async => throw Exception('gagal terhubung ke server');
+
+  @override
+  Future<void> bersihkan() async {}
+
+  @override
+  Future<Never> unduh(
+    InfoApk info, {
+    void Function(int diterima, int total)? onProgress,
+  }) async =>
+      throw UnimplementedError('tidak dipakai');
+}
+
 class _FakeInstaller implements ApkInstaller {
   @override
   Future<HasilPasang> pasang(String pathApk) async =>
@@ -138,7 +153,56 @@ void main() {
 
     await tester.pumpWidget(bungkus(provider));
     await tester.pump();
-
     expect(find.text('Pembaruan tersedia'), findsNothing);
+  });
+
+  // Dua kasus berikut ini sebelumnya MENYEMBUNYIKAN kartu sekaligus
+  // menyembunyikan satu-satunya penjelasan kenapa tidak ada pembaruan.
+  // Kasir melihat tidak ada apa-apa sama sekali dan tidak punya cara tahu
+  // bahwa masalahnya di aplikasi, bukan di server.
+  testWidgets('pengecekan gagal: alasan dan tombol Coba lagi tetap tampil', (
+    tester,
+  ) async {
+    await diLebarHp(tester);
+    final provider = UpdateProvider(
+      _GagalRepository(),
+      installer: _FakeInstaller(),
+    );
+    await provider.cek();
+
+    await tester.pumpWidget(bungkus(provider));
+    await tester.pump();
+
+    expect(find.textContaining('gagal terhubung'), findsOneWidget);
+    expect(find.text('Coba lagi'), findsOneWidget);
+    // Tombol unduh tidak boleh muncul kalau tidak ada apa pun untuk diunduh.
+    expect(find.text('Perbarui sekarang'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('nomor versi tidak terbaca: alasannya tetap tampil', (
+    tester,
+  ) async {
+    await diLebarHp(tester);
+    // APK di server ada tapi versionCode-nya kosong, jadi tidak bisa
+    // dibandingkan. Provider TIDAK boleh menebak "ada pembaruan".
+    final provider = UpdateProvider(
+      _FakeApkRepository(
+        InfoApk.fromJson(const {'ada': true, 'versionCode': null}),
+      ),
+      installer: _FakeInstaller(),
+    );
+    await provider.cek();
+
+    await tester.pumpWidget(bungkus(provider));
+    await tester.pump();
+
+    expect(provider.adaPembaruan, isFalse);
+    expect(find.text('Pembaruan tersedia'), findsNothing);
+    expect(
+      find.textContaining('Nomor versi APK di server tidak terbaca'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 }

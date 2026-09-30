@@ -17,10 +17,19 @@ class UpdateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final update = context.watch<UpdateProvider>();
-    final tampil =
-        !update.adaPembaruan && update.tahap == TahapPembaruan.siapPasang
-            ? true
-            : update.adaPembaruan || update.sibuk || update.galat != null;
+    // `alasanTidakBisaDicek` WAJIB ikut di sini, bukan cuma di dalam kartu.
+    //
+    // Alasannya: penjelasan itu hanya bisa dirender DI DALAM kartu. Kalau
+    // syaratnya tidak ikut, maka kasus "nomor versi tidak terbaca" akan
+    // menyembunyikan kartu sekaligus menyembunyikan satu-satunya penjelasan
+    // kenapa tidak ada pembaruan. Kasir melihat tidak ada apa-apa sama sekali
+    // dan tidak punya cara tahu bahwa aplikasinya yang bermasalah, bukan
+    // server-nya.
+    final tampil = update.adaPembaruan ||
+        update.sibuk ||
+        update.galat != null ||
+        update.alasanTidakBisaDicek != null ||
+        update.tahap == TahapPembaruan.siapPasang;
     if (!tampil) return const SizedBox.shrink();
 
     return Padding(
@@ -114,6 +123,8 @@ class _Card extends StatelessWidget {
                 height: 1.4,
               ),
             ),
+          // `alasanTidakBisaDicek` sudah mengembalikan `galat` kalau ada,
+          // jadi pesan error TIDAK dirender dua kali lewat blok terpisah.
           if (update.alasanTidakBisaDicek != null) ...[
             const SizedBox(height: 6),
             Text(
@@ -165,7 +176,10 @@ class _Card extends StatelessWidget {
               ),
             ),
           if (ringkas && !mengunduh && !memasang) const SizedBox(height: 4),
-          if (!ringkas || update.adaPembaruan) ...[
+          if (!ringkas ||
+              update.adaPembaruan ||
+              update.galat != null ||
+              update.alasanTidakBisaDicek != null) ...[
             const SizedBox(height: 14),
             _Tombol(
               update: update,
@@ -198,6 +212,30 @@ class _Tombol extends StatelessWidget {
     if (mengunduh || memasang) {
       return const SizedBox.shrink();
     }
+
+    // Tanpa pembaruan yang bisa diunduh, tombol "Perbarui sekarang" tidak
+    // boleh muncul: menekan tombol unduh yang tidak ada gunanya lebih buruk
+    // daripada tidak punya tombol sama sekali. Yangabin justru "Coba lagi",
+    // karena kasus ini muncul karena pengecekan yang gagal.
+    final adaYangBisaDiunduh = update.adaPembaruan || siap;
+
+    if (!adaYangBisaDiunduh) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => context.read<UpdateProvider>().cek(paksa: true),
+          icon: const Icon(Icons.refresh, size: 18),
+          label: const Text('Coba lagi'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(46),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Row(
       children: [
         Expanded(
