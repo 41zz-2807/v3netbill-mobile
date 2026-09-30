@@ -115,14 +115,8 @@ class _LoginPageState extends State<LoginPage> {
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Gunakan akun admin atau kasir warnet.',
-                              style: TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 13,
-                              ),
-                            ),
+                            // Teks petunjuk "Gunakan akun admin atau kasir warnet." sengaja
+                            // dihapus; jarak ke tombol di bawah tetap 24.
                             const SizedBox(height: 24),
                             TextFormField(
                               controller: _usernameCtrl,

@@ -84,6 +84,18 @@ class ApiClient {
   Future<dynamic> _guard(
     Future<Response<dynamic>> Function() call,
   ) async {
+    // PENTING: 401 HANYA bermakna "token tidak valid" kalau permintaan ini
+    // benar-benar membawa token. `POST /auth/login` tidak butuh token, jadi
+    // 401 dari sana berarti username atau password salah.
+    //
+    // Versi lama menganggap semua 401 itu masalah token. Akibatnya password
+    // salah menampilkan "Token tidak valid atau sudah kedaluwarsa" — kalimat
+    // yang tidak ada hubungannya dengan yang diketik pengguna — DAN ikut
+    // menghapus sesi, jadi login gagal yang sah bisa membuat pengguna yang
+    // tadinya sudah masuk kehilangan sesinya.
+    final adaToken =
+        (await _secureStore.readToken())?.trim().isNotEmpty ?? false;
+
     try {
       final res = await call();
       final code = res.statusCode ?? 0;
@@ -92,6 +104,14 @@ class ApiClient {
         return res.data;
       }
       if (code == 401) {
+        if (!adaToken) {
+          // Kredensial ditolak. Pesan dari server yang ditampilkan, dan sesi
+          // tidak disentuh.
+          throw ApiException(
+            _extractMessage(res),
+            statusCode: 401,
+          );
+        }
         await _secureStore.clear();
         onUnauthorized?.call();
         throw ApiException(
@@ -108,6 +128,9 @@ class ApiClient {
       // jaringan murni tidak punya response.
       final res = e.response;
       if (res != null) {
+        if (res.statusCode == 401 && !adaToken) {
+          throw ApiException(_extractMessage(res), statusCode: 401);
+        }
         throw ApiException(
           _extractMessage(res),
           statusCode: res.statusCode,

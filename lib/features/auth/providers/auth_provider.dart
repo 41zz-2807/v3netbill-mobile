@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../core/notifikasi/notifikasi_provider.dart';
+import '../../../core/network/api_exception.dart';
 import '../data/auth_repository.dart';
 import '../models/user_session.dart';
 
@@ -115,9 +116,15 @@ class AuthProvider extends ChangeNotifier {
   }
 
   String _friendly(Object e) {
-    final text = e.toString();
-    if (text.contains('ApiException')) {
-      return text.split('): ').last;
+    if (e is ApiException) {
+      // 401 di sini PASTI kredensial ditolak, karena kita masih di layar
+      // login dan belum ada token yang dikirim. Pesan bawaan server
+      // ("Invalid credentials") berbahasa Inggris dan tidak menyebut apa yang
+      // harus diperbaiki.
+      if (e.statusCode == 401) {
+        return 'Username atau password salah.';
+      }
+      return e.message;
     }
     return 'Login gagal. Periksa username dan password.';
   }
