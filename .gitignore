@@ -20,6 +20,9 @@ android/local.properties
 *.jks
 *.keystore
 key.properties
+# Konfigurasi Firebase. Isinya mengidentifikasi project Firebase kita, jadi
+# tidak ikut repo. CI mengambilnya dari secret GOOGLE_SERVICES_JSON_BASE64.
+android/app/google-services.json
 
 # IDE
 .idea/

@@ -47,6 +47,23 @@ jobs:
       - name: Jalankan test
         run: flutter test --no-pub
 
+      - name: Siapkan google-services.json
+        # Plugin `com.google.gms.google-services` MEMBANGGUN build kalau file ini
+        # tidak ada, dan tidak ada fallback yang sah: aplikasi tanpa project id
+        # Firebase tidak bisa mengirim push sama sekali.
+        #
+        # Karena itu langkah ini GAGAL dengan pesan jelas kalau secret belum diisi,
+        # berbeda dengan langkah keystore yang sengaja jatuh ke debug key.
+        # "Build hijau" di sini berarti bukan berarti "aplikasi benar".
+        run: |
+          if [ -z "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" ]; then
+            echo "::error::secret GOOGLE_SERVICES_JSON_BASE64 belum diisi. tidak bisa membuat APK release dengan Firebase." >&2
+            exit 1
+          fi
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 -d \
+            > android/app/google-services.json
+          echo "  google-services.json dipakai"
+
       - name: Siapkan keystore rilis
         # Keystore TIDAK disimpan di repo. Workflow ini mengambilnya dari
         # secret KEYS_BASE64. Kalau secret belum diisi, build tetap jalan

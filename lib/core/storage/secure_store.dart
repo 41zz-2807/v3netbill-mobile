@@ -16,6 +16,7 @@ class SecureStore {
   static const _kToken = 'v3netbill_token';
   static const _kRole = 'v3netbill_role';
   static const _kUsername = 'v3netbill_username';
+  static const _kNotifikasiSesi = 'v3netbill_notif_sesi';
 
   /// Kunci ini harus sama dengan yang dipakai aplikasi web, supaya saat
   /// logout dari web tidak bentrok. Lihat `src/lib/api.ts` di repo
@@ -47,5 +48,23 @@ class SecureStore {
     await _storage.delete(key: _kToken);
     await _storage.delete(key: _kRole);
     await _storage.delete(key: _kUsername);
+    // KUNCI `_kNotifikasiSesi` SENGAJA TIDAK dihapus di sini.
+    //
+    // Ini preferensi perangkat, bukan bagian dari sesi login. Kalau ikut
+    // terhapus, setiap logout akan mengembalikan sakelarnya ke default, jadi
+    // kasir yang sengaja mematikannya akan melihat sakelarnya nyala lagi
+    // setelah login berikutnya.
+  }
+
+  /// Sakelar notifikasi login pelanggan. Null berarti belum pernah disimpan,
+  /// dan itu diperlakukan sebagai menyala.
+  Future<bool?> readNotifikasiSesi() async {
+    final nilai = await _storage.read(key: _kNotifikasiSesi);
+    if (nilai == null || nilai.isEmpty) return null;
+    return nilai == '1';
+  }
+
+  Future<void> saveNotifikasiSesi(bool nilai) async {
+    await _storage.write(key: _kNotifikasiSesi, value: nilai ? '1' : '0');
   }
 }

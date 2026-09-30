@@ -39,8 +39,17 @@ class MainActivity : FlutterActivity() {
 
     private companion object {
         const val CHANNEL = "v3netbill/install"
+        const val CHANNEL_NOTIF = "v3netbill/notifikasi"
         const val REQ_IZIN = 9101
         const val REQ_PASANG = 9102
+        const val REQ_IZIN_NOTIF = 9103
+
+        // WAJIB sama dengan CHANNEL_ID di backend
+        // (`src/notifikasi/notifikasi.service.ts`). Kalau berbeda, FCM tetap
+        // membalas berhasil, tapi Android memakai channel bawaannya yang
+        // importance-nya rendah: notifikasi muncul tanpa suara dan getaran.
+        const val ID_CHANNEL_NOTIF = "sesi_dimulai"
+        const val NAMA_CHANNEL_NOTIF = "Sesi dimulai"
 
         // Nilai status ini dibaca sisi Dart di `lib/core/apk/apk_installer.dart`.
         // Kalau diubah, ubah juga di sana.
@@ -52,9 +61,49 @@ class MainActivity : FlutterActivity() {
 
     private var hasilMenunggu: MethodChannel.Result? = null
     private var berkasMenunggu: String? = null
+    private var hasilNotifMenunggu: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // Channel notifikasi terpisah dari channel installer. Keduanya memakai
+        // `startActivityForResult`, jadi keduanya harus ditangani di
+        // `onActivityResult` yang sama.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL_NOTIF)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "siapkanChannel" -> {
+                        siapkanChannelNotifikasi()
+                        result.success(true)
+                    }
+                    "izin" -> {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                            // Android 12 ke bawah tidak ada izin notifikasi
+                            // runtime, jadi selalu dianggap diberikan.
+                            result.success(mapOf("status" to "diberi"))
+                            return@setMethodCallHandler
+                        }
+                        if (hasIzinNotifikasi()) {
+                            result.success(mapOf("status" to "diberi"))
+                            return@setMethodCallHandler
+                        }
+                        if (hasilNotifMenunggu != null) {
+                            result.success(mapOf("status" to "gagal", "pesan" to "Sudah ada permintaan izin yang berjalan."))
+                            return@setMethodCallHandler
+                        }
+                        hasilNotifMenunggu = result
+                        @Suppress("DEPRECATION")
+                        requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), REQ_IZIN_NOTIF)
+                    }
+                    "statusIzin" -> {
+                        result.success(
+                            mapOf("status" to if (hasIzinNotifikasi()) "diberi" else "belum"),
+                        )
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
                 if (call.method != "pasang") {
@@ -92,6 +141,37 @@ class MainActivity : FlutterActivity() {
         } else {
             true
         }
+
+    private fun hasIzinNotifikasi(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+
+    /**
+     * Buat channel notifikasi dengan importance TINGGI.
+     *
+     * PENTING: kalau channel tidak dibuat, FCM memakai channel bawaannya yang
+     * importance-nya rendah. Notifikasi tetap muncul, tapi tanpa suara dan
+     * tanpa getaran — dan itu justru bagian yang paling dibutuhkan di warnet,
+     * karena kasir harus tahu ada pelanggan yang masuk dari kamar sebelah.
+     */
+    private fun siapkanChannelNotifikasi() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = getSystemService(android.app.NotificationManager::class.java) ?: return
+        val channel = android.app.NotificationChannel(
+            ID_CHANNEL_NOTIF,
+            NAMA_CHANNEL_NOTIF,
+            android.app.NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = "Pemberitahuan saat pelanggan memulai sesi di komputer warnet"
+            enableLights(true)
+            enableVibration(true)
+        }
+        manager.createNotificationChannel(channel)
+    }
 
     private fun lanjutkanKalauBoleh() {
         val hasil = hasilMenunggu
@@ -170,6 +250,32 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /**
+     * Balasan dari `requestPermissions` untuk izin notifikasi.
+     *
+     * Sengaja method terpisah dari `onActivityResult`: permintaan izin lewat
+     * `requestPermissions` diteruskan ke sini, bukan ke sana. Kalau ini
+     * diletakkan di `onActivityResult`, hasilnya tidak pernah sampai.
+     *
+     * Sama seperti izin pasang aplikasi, `grantResults` dicek langsung dan
+     * bukan dari `resultCode`, karena Android tidak memakai resultCode untuk
+     * Ini. Pemeriksaan dilakukan ulang lewat `hasIzinNotifikasi()` supaya
+     * sumber kebenaran tetap satu.
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != REQ_IZIN_NOTIF) return
+        val hasil = hasilNotifMenunggu ?: return
+        hasilNotifMenunggu = null
+        hasil.success(
+            mapOf("status" to if (hasIzinNotifikasi()) "diberi" else "ditolak"),
+        )
+    }
+
     override fun onDestroy() {
         // Jangan tinggalkan MethodChannel.Result yang menggantung: kalau
         // aplikasi ditutup saat installer terbuka, sisi Dart menunggu
@@ -177,6 +283,10 @@ class MainActivity : FlutterActivity() {
         hasilMenunggu?.success(mapOf("status" to S_DIBATALKAN))
         hasilMenunggu = null
         berkasMenunggu = null
+        // Sama untuk izin notifikasi: kalau proses mati saat dialog izin
+        // tampil, sisi Dart akan menunggu selamanya.
+        hasilNotifMenunggu?.success(mapOf("status" to "dibatalkan"))
+        hasilNotifMenunggu = null
         super.onDestroy()
     }
 }

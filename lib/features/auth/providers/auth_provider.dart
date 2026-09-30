@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
+import '../../../core/notifikasi/notifikasi_provider.dart';
 import '../data/auth_repository.dart';
 import '../models/user_session.dart';
 
@@ -20,9 +23,13 @@ enum AuthStatus {
 
 /// Mengatur seluruh siklus hidup sesi.
 class AuthProvider extends ChangeNotifier {
-  AuthProvider(this._repo);
+  AuthProvider(this._repo, [this._notifikasi]);
 
   final AuthRepository _repo;
+
+  /// Opsional supaya halaman yang hanya butuh state login tidak harus membuat
+  /// notifikasi. Kalau null, tidak ada token yang didaftarkan.
+  final NotifikasiProvider? _notifikasi;
 
   AuthStatus _status = AuthStatus.checking;
   UserSession? _session;
@@ -39,6 +46,18 @@ class AuthProvider extends ChangeNotifier {
     _session = s;
     _status = s == null ? AuthStatus.unauthenticated : AuthStatus.authenticated;
     notifyListeners();
+    // Sesi yang dipulihkan dari penyimpanan HARUS lewat sini juga, bukan cuma
+    // lewat `login()`.
+    //
+    // Alasannya: begitu aplikasi di-update, data aplikasi tidak hilang, jadi
+    // sesi lama masih tersimpan dan aplikasi membuka lewat `bootstrap()` —
+    // `login()` tidak pernah dipanggil. Kalau token push hanya didaftarkan di
+    // `login()`, tokennya tidak akan pernah terkirim sampai kasir logout dulu.
+    // Itu persis yang terjadi: HP sudah terpasang, izin sudah diberikan, tapi
+    // tabel `Perangkat` tetap kosong.
+    if (s != null) {
+      unawaited(_notifikasi?.setelahLogin(admin: s.isAdmin));
+    }
   }
 
   Future<bool> login({
@@ -56,6 +75,9 @@ class AuthProvider extends ChangeNotifier {
       );
       _status = AuthStatus.authenticated;
       notifyListeners();
+      // Jangan ditunggu: login sudah berhasil dan kasir tidak boleh menunggu
+      // proses jaringan notifikasi sebelum bisa mulai berjualan.
+      unawaited(_notifikasi?.setelahLogin(admin: _session!.isAdmin));
       return true;
     } catch (e) {
       _status = AuthStatus.unauthenticated;
@@ -66,6 +88,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    // WAJIB sebelum `_repo.logout()`: penghapusan token memakai JWT, dan
+    // `logout()` membersihkan token itu dari penyimpanan. Kalau urutannya
+    // dibalik, permintaannya terkirim tanpa autentikasi dan server membalas
+    // 401, sehingga token push tertinggal untuk akun yang sudah logout.
+    await _notifikasi?.sebelumLogout();
     await _repo.logout();
     _session = null;
     _status = AuthStatus.unauthenticated;

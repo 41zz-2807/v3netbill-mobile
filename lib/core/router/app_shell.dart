@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +9,8 @@ import '../../features/auth/view/login_page.dart';
 import '../../features/pcs/view/dashboard_page.dart';
 import '../../features/profile/view/profile_page.dart';
 import '../apk/update_provider.dart';
+import '../notifikasi/notifikasi_provider.dart';
+import '../notifikasi/push_client.dart';
 import '../theme/app_colors.dart';
 
 /// Kerangka aplikasi: menampilkan login dulu, lalu membungkus seluruh halaman
@@ -20,6 +24,41 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+  StreamSubscription<PushPesan>? _langgananBanner;
+
+  @override
+  void initState() {
+    super.initState();
+    // FCM tidak menampilkan notifikasi otomatis saat aplikasi sedang
+    // terbuka, jadi pesannya datang ke sini dan ditampilkan sebagai banner.
+    //
+    // Banner dipakai, bukan notifikasi sistem: notifikasi yang muncul di atas
+    // aplikasi yang sedang dibaca justru mengganggu.
+    _langgananBanner =
+        context.read<NotifikasiProvider>().banner.listen(_tampilkanBanner);
+  }
+
+  @override
+  void dispose() {
+    _langgananBanner?.cancel();
+    super.dispose();
+  }
+
+  void _tampilkanBanner(PushPesan pesan) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${pesan.judul} · ${pesan.isi}'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.bgCard,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+  }
 
   @override
   Widget build(BuildContext context) {

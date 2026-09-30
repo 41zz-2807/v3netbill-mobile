@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/apk/update_provider.dart';
+import '../../../core/notifikasi/notifikasi_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pcs/providers/pc_provider.dart';
@@ -15,6 +16,7 @@ class ProfilePage extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final session = auth.session;
     final update = context.watch<UpdateProvider>();
+    final notifikasi = context.watch<NotifikasiProvider>();
     // Ringkas, bukan objek Provider: di rebuild berikutnya object yang sama
     // akan menggagalkan perbandingan dan memicu build tanpa guna.
     final statusTeks = switch (update.tahap) {
@@ -137,6 +139,57 @@ class ProfilePage extends StatelessWidget {
 
         const SizedBox(height: 18),
 
+        // Sakelar notifikasi. Hanya bermakna untuk akun admin, jadi kalau
+        // session-nya kasir, sakelarnya disembunyikan: baris yang tidak pernah
+        // berubah akan membuat orang mengira ada yang salah.
+        if (session?.isAdmin ?? false) ...[
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.bgCard,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.divider),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.notifications_active_outlined,
+                  size: 18,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Notifikasi pelanggan login',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Memberi tahu saat ada pelanggan yang mulai sesi di komputer',
+                        style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: notifikasi.aktif,
+                  onChanged: (v) => _ubahNotifikasi(context, v),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+        ],
+
         // Keluar
         OutlinedButton.icon(
           onPressed: () => _confirmLogout(context),
@@ -157,6 +210,34 @@ class ProfilePage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Terpanggil setelah sakelar dinyalakan.
+  ///
+  /// Kalau izin notifikasinya belum diberikan, kasir harus diberi tahu —
+  /// tanpa itu sakelarnya terlihat menyala tapi tidak pernah ada notifikasi
+  /// yang muncul, dan itu hasil yang paling membingungkan.
+  Future<void> _ubahNotifikasi(BuildContext context, bool nilai) async {
+    final notifikasi = context.read<NotifikasiProvider>();
+    await notifikasi.setAktif(nilai);
+    if (!context.mounted) return;
+
+    if (!nilai) {
+      await notifikasi.cabutToken();
+      return;
+    }
+
+    final session = context.read<AuthProvider>().session;
+    await notifikasi.setelahLogin(admin: session?.isAdmin ?? false);
+    if (!context.mounted) return;
+
+    final pesan = notifikasi.izinDiberikan
+        ? 'Notifikasi pelanggan login dinyalakan.'
+        : 'Izin notifikasi belum diberikan. Nyalakan di Pengaturan > Aplikasi > '
+            'v3Netbill > Izin > Notifikasi.';
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(pesan)));
   }
 
   Future<void> _confirmLogout(BuildContext context) async {

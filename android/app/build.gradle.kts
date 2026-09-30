@@ -2,6 +2,9 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
+    // Harus SESUDAH com.android.application: plugin ini butuh applicationId
+    // untuk mencocokkan package name di dalam google-services.json.
+    id("com.google.gms.google-services")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }

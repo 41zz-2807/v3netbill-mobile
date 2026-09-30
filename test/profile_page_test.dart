@@ -7,6 +7,9 @@ import 'package:v3netbill_mobile/core/apk/apk_repository.dart';
 import 'package:v3netbill_mobile/core/apk/info_apk.dart';
 import 'package:v3netbill_mobile/core/apk/update_provider.dart';
 import 'package:v3netbill_mobile/core/network/socket_service.dart';
+import 'package:v3netbill_mobile/core/notifikasi/notifikasi_provider.dart';
+import 'package:v3netbill_mobile/core/notifikasi/notifikasi_repository.dart';
+import 'package:v3netbill_mobile/core/storage/secure_store.dart';
 import 'package:v3netbill_mobile/core/theme/app_colors.dart';
 import 'package:v3netbill_mobile/core/theme/app_theme.dart';
 import 'package:v3netbill_mobile/features/auth/data/auth_repository.dart';
@@ -134,6 +137,20 @@ class _FakeApkInstaller implements ApkInstaller {
       const HasilPasang(StatusPasang.gagal, 'tidak dipakai');
 }
 
+class _FakeNotifikasiRepository implements NotifikasiRepository {
+  final List<String> terdaftar = [];
+  final List<String> dihapus = [];
+
+  @override
+  Future<bool> daftar(String token) async {
+    terdaftar.add(token);
+    return true;
+  }
+
+  @override
+  Future<void> hapus(String token) async => dihapus.add(token);
+}
+
 /// Widget test untuk kartu informasi di halaman Profile.
 ///
 /// Yang diuji adalah perataan, bukan isi teks. Bug yang pernah ada:
@@ -181,11 +198,19 @@ void main() {
     );
     await update.cek();
 
+    // `push: null` supaya tidak ada yang menyentuh Firebase. Dengan begitu
+    // provider tidak pernah memanggil repository, jadi tidak ada jaringan.
+    final notifikasi = NotifikasiProvider(
+      repository: _FakeNotifikasiRepository(),
+      store: SecureStore(),
+    );
+
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<UpdateProvider>.value(value: update),
+          ChangeNotifierProvider<NotifikasiProvider>.value(value: notifikasi),
           ChangeNotifierProvider<PcProvider>(
             create: (_) => PcProvider(_FakePcRepository(), socket),
           ),
