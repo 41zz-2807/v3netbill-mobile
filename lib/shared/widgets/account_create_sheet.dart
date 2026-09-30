@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../features/accounts/models/account.dart';
+import '../utils/rupiah_input.dart';
 
 /// Isi form yang dikembalikan [showAccountCreateSheet].
 ///
@@ -60,19 +61,37 @@ Future<AccountDraft?> showAccountCreateSheet(
           if (tipe == AccountType.member) ...[
             TextField(
               controller: _namaCtrl,
+              // Batas dipasang di level input, bukan dipotong saat dikirim.
+              // Nama member adalah kredensial sesi, jadi kalau dipotong diam-
+              // diam pelanggan akan gagal login dengan nama yang berbeda dari
+              // yang tertulis di kartunya.
+              maxLength: maksKarakterNama,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
               style: const TextStyle(color: AppColors.textPrimary),
               decoration: const InputDecoration(
                 labelText: 'Nama member',
+                helperText: 'Nama ini dipakai pelanggan untuk mulai sesi',
                 prefixIcon: Icon(Icons.person_outline, size: 20),
               ),
             ),
+            const SizedBox(height: 14),
           ],
           TextField(
             controller: _nominalCtrl,
             keyboardType: TextInputType.number,
+            inputFormatters: const [FormatRibuan()],
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(ctx, tipe),
             style: const TextStyle(color: AppColors.textPrimary),
             decoration: InputDecoration(
-              labelText: tipe == AccountType.voucher ? 'Nominal voucher' : 'Saldo awal',
+              labelText: tipe == AccountType.voucher
+                  ? 'Nominal voucher'
+                  : 'Saldo awal',
+              // Dulu kolom ini sudah terisi 10000. Kasir menekan Simpan tanpa
+              // sadar dan ada voucher seharga Rp 10.000, padahal maksudnya
+              // mungkin Rp 1.000. Sekarang kosong, dengan petunjuk yang jelas.
+              hintText: 'Contoh: 10.000',
               prefixIcon: const Icon(Icons.payments_outlined, size: 20),
               suffixText: 'Rp',
             ),
@@ -92,11 +111,17 @@ Future<AccountDraft?> showAccountCreateSheet(
 /// kali keyboard muncul atau hilang. Kalau controller dibuat di dalam builder,
 /// teks yang sudah diketik bisa ikut terhapus.
 final _namaCtrl = TextEditingController();
-final _nominalCtrl = TextEditingController(text: '10000');
+final _nominalCtrl = TextEditingController();
 
 /// Mengisi ulang controller sebelum form dibuka.
+///
+/// ⚠️ Kolom nominal sengaja dikosongkan, bukan diisi 10000 seperti versi
+/// lama. Terisi diam-diam berarti kasir bisa menekan Simpan tanpa membaca,
+/// lalu membuat handout Rp 10.000 padahal maksudnya mungkin Rp 1.000.
+/// mengubah nilai yang diketik kasir tanpa dia sadari.
+/// mengubah nilai yang diketik kasir tanpa dia sadari.
 void _resetControllers(AccountType tipe) {
-  _nominalCtrl.text = '10000';
+  _nominalCtrl.clear();
   if (tipe == AccountType.member) {
     _namaCtrl.clear();
   }
@@ -106,9 +131,12 @@ String? _validate(AccountType tipe) {
   if (tipe == AccountType.member && _namaCtrl.text.trim().isEmpty) {
     return 'Nama member wajib diisi.';
   }
-  final nominal = int.tryParse(_nominalCtrl.text.trim());
+  if (_namaCtrl.text.trim().length > maksKarakterNama) {
+    return 'Nama member maksimal $maksKarakterNama karakter.';
+  }
+  final nominal = parseNominal(_nominalCtrl.text);
   if (nominal == null) {
-    return 'Nominal harus berupa angka.';
+    return 'Nominal wajib diisi.';
   }
   if (nominal < 500) {
     return 'Nominal minimal Rp 500.';
@@ -134,7 +162,7 @@ void _submit(BuildContext ctx, AccountType tipe) {
     ctx,
     AccountDraft(
       nama: _namaCtrl.text.trim(),
-      nominal: int.parse(_nominalCtrl.text.trim()),
+      nominal: parseNominal(_nominalCtrl.text)!,
     ),
   );
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/utils/formatters.dart';
+import '../../../shared/utils/rupiah_input.dart';
 import '../../../shared/widgets/account_create_sheet.dart';
 import '../../../shared/widgets/common.dart';
 import '../models/account.dart';
@@ -313,6 +314,7 @@ class _AccountsPageState extends State<AccountsPage>
           controller: ctrl,
           autofocus: true,
           keyboardType: TextInputType.number,
+          inputFormatters: const [FormatRibuan()],
           style: const TextStyle(color: AppColors.textPrimary),
           decoration: InputDecoration(hintText: hint, suffixText: 'Rp'),
         ),
@@ -330,9 +332,12 @@ class _AccountsPageState extends State<AccountsPage>
     );
 
     if (submit != true || !context.mounted) return;
-    final amount = int.tryParse(ctrl.text.trim()) ?? 0;
-    if (amount <= 0) {
-      _toast(context, 'Nominal tidak valid.', false);
+    // `parseNominal`, bukan `int.tryParse`: kolomnya sudah berformat ribuan,
+    // jadi "10.000" akan gagal kalau diteruskan apa adanya ke int.tryParse.
+    final amount = parseNominal(ctrl.text) ?? 0;
+    if (amount < 500 || amount % 500 != 0) {
+      _toast(
+          context, 'Nominal harus kelipatan Rp 500 dan minimal Rp 500.', false);
       return;
     }
     final ok = await onSubmit(amount);

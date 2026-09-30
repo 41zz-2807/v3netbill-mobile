@@ -241,26 +241,55 @@ class PcCard extends StatelessWidget {
               style: TextStyle(fontSize: 12, color: AppColors.textMuted),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () =>
-                        Navigator.pop(ctx, _MulaiAksi.buatVoucher),
-                    icon: const Icon(Icons.confirmation_number_outlined,
-                        size: 18),
-                    label: const Text('Voucher'),
+            // ⚠️ Sempat dua `Expanded` + `OutlinedButton.icon` di dalam `Row`.
+            // Lebar tombol dipaksa sama oleh Expanded, dan lebar itu tidak
+            // cukup untuk ikon + teks "Voucher"/"Member", sehingga huruf
+            // terakhir turun ke baris kedua ("Vouche" / "Membe").
+            //
+            // `Wrap` membiarkan tiap tombol selebar isinya, jadi teksnya tidak
+            // pernah dipatahkan. Kalau kebetulan tidak cukup ruang untuk dua
+            // tombol sekaligus, yang turun baris adalah tombolnya, bukan
+            // huruf di dalam tombol.
+            //
+            // Lapis kedua: `SizedBox(width: infinity)` di dalam `Wrap`.
+            // Tanpa ini `Wrap` hanya dapat 139px di layar 390px, karena
+            // `Column` di dalam AlertDialog memakai crossAxisAlignment
+            // center sehingga anaknya dapat batasan longgar dan menyusut
+            // jadi selebar anaknya yang terlebar. Akibatnya kedua tombol
+            // turun ke dua baris padahal ruangnya cukup.
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                // Dihitung, bukan ditebak: pada 390px ruang isi dialog 262px.
+                // "Voucher" butuh 130px dan "Member" 117px dengan padding 8,
+                // jadi 130 + 8 + 117 = 255px, sisa 7px. Dengan padding 12
+                //-olds-nya butuh 275px dan keduanya turun ke dua baris.
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.pop(ctx, _MulaiAksi.buatVoucher),
+                    icon: const Icon(
+                      Icons.confirmation_number_outlined,
+                      size: 15,
+                    ),
+                    label: const Text('Voucher', maxLines: 1, softWrap: false),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      textStyle: const TextStyle(fontSize: 13),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
+                  OutlinedButton.icon(
                     onPressed: () => Navigator.pop(ctx, _MulaiAksi.buatMember),
-                    icon: const Icon(Icons.person_outline, size: 18),
-                    label: const Text('Member'),
+                    icon: const Icon(Icons.person_outline, size: 15),
+                    label: const Text('Member', maxLines: 1, softWrap: false),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      textStyle: const TextStyle(fontSize: 13),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
