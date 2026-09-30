@@ -6,6 +6,7 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/view/login_page.dart';
 import '../../features/pcs/view/dashboard_page.dart';
 import '../../features/profile/view/profile_page.dart';
+import '../apk/update_provider.dart';
 import '../theme/app_colors.dart';
 
 /// Kerangka aplikasi: menampilkan login dulu, lalu membungkus seluruh halaman
@@ -24,6 +25,9 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final status = context.select<AuthProvider, AuthStatus>(
       (a) => a.status,
+    );
+    final adaPembaruan = context.select<UpdateProvider, bool>(
+      (u) => u.adaPembaruan,
     );
 
     switch (status) {
@@ -55,26 +59,67 @@ class _AppShellState extends State<AppShell> {
             // Halaman PC dan Transaksi sengaja tidak ada sebagai tab terpisah.
             // Semua PC sudah tampil di dashboard, jadi tab PC hanya menduplikasi
             // isi yang sama.
-            destinations: const [
-              NavigationDestination(
+            destinations: [
+              const NavigationDestination(
                 icon: Icon(Icons.home_outlined),
                 selectedIcon: Icon(Icons.home),
                 label: 'Home',
               ),
-              NavigationDestination(
+              const NavigationDestination(
                 icon: Icon(Icons.confirmation_number_outlined),
                 selectedIcon: Icon(Icons.confirmation_number),
                 label: 'Voucher',
               ),
+              // Penanda merah di pojok ikon kalau ada versi baru. Sengaja
+              // titik kecil, bukan angka, supaya tidak membuat NavigationBar
+              // melebar di HP layar sempit.
               NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
+                icon: _Badge(
+                  aktif: adaPembaruan,
+                  child: const Icon(Icons.person_outline),
+                ),
+                selectedIcon: _Badge(
+                  aktif: adaPembaruan,
+                  child: const Icon(Icons.person),
+                ),
                 label: 'Profile',
               ),
             ],
           ),
         );
     }
+  }
+}
+
+/// Titik merah kecil di pojok ikon tab Profile.
+class _Badge extends StatelessWidget {
+  const _Badge({required this.aktif, required this.child});
+
+  final bool aktif;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!aktif) return child;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          right: -2,
+          top: -1,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: AppColors.danger,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.bgBase, width: 1.2),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

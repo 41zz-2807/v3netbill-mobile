@@ -67,18 +67,37 @@ jobs:
             echo "  secret KEYS_BASE64 kosong, pakai debug key"
           fi
 
+      - name: Tentukan nomor versi
+        # PENTING: ini yang membuat fitur "cek pembaruan" di aplikasi bisa
+        # bekerja. Seluruh 12 build sebelumnya punya versionCode = 1, jadi
+        # aplikasi tidak punya satu pun angka untuk dibandingkan dengan APK di
+        # server. `github.run_number` selalu naik dan tidak perlu diingat.
+        #
+        # APK yang sudah terpasang di HP kasir sekarang versionCode = 1, jadi
+        # build pertama setelah perubahan ini (run_number 13) otomatis dianggap
+        # lebih baru oleh aplikasi.
+        run: |
+          echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
+          echo "BUILD_NAME=1.0.${{ github.run_number }}" >> "$GITHUB_ENV"
+
+      - name: Tampilkan nomor versi
+        run: |
+          echo "versi yang dipakai: $BUILD_NAME (versionCode $BUILD_NUMBER)"
+
       - name: Build APK release universal
         # Universal, bukan --split-per-abi, supaya hasilnya satu file yang bisa
         # dipasang di HP mana pun. Split per-ABI masih dipakai sebagai langkah
         # tambahan untuk yang mau mengunduh versi lebih kecil.
         run: |
           flutter build apk --release \
+            --build-name="$BUILD_NAME" --build-number="$BUILD_NUMBER" \
             --dart-define=API_BASE_URL=https://v3netbill.bilmary.my.id/api \
             --dart-define=API_WS_URL=wss://v3netbill.bilmary.my.id/session
 
       - name: Build APK release per-ABI
         run: |
           flutter build apk --release --split-per-abi \
+            --build-name="$BUILD_NAME" --build-number="$BUILD_NUMBER" \
             --dart-define=API_BASE_URL=https://v3netbill.bilmary.my.id/api \
             --dart-define=API_WS_URL=wss://v3netbill.bilmary.my.id/session
 
@@ -90,6 +109,24 @@ jobs:
           # APK per-ABI ada di direktori ini pada Flutter versi terbaru
           find build -name "*.apk" -exec cp {} apk/ \; 2>/dev/null || true
           ls -la apk/
+
+      - name: Pastikan nomor versi benar-benar masuk ke APK
+        # Jangan percaya "build succeeded". APK yang salah versi membuat setiap
+        # HP kasir menampilkan penanda "pembaruan tersedia" yang tak pernah
+        # bisa dibersihkan. Letakkan SETELAH "Kumpulkan APK", karena berkas
+        # yang diperiksa baru ada setelah langkah itu.
+        run: |
+          if command -v aapt2 >/dev/null 2>&1; then
+            aapt2=$(command -v aapt2)
+          else
+            aapt2=$(ls -d "${ANDROID_HOME}"/build-tools/*/ | sort -V | tail -1)aapt2
+          fi
+          badging=$("$aapt2" dump badging apk/app-release.apk | head -1)
+          echo "$badging"
+          case "$badging" in
+            *"versionCode='$BUILD_NUMBER'"*) echo "versionCode sesuai ($BUILD_NUMBER)" ;;
+            *) echo "GAGAL: versionCode APK tidak sama dengan $BUILD_NUMBER"; exit 1 ;;
+          esac
 
       - name: Unggah APK sebagai artifact
         uses: actions/upload-artifact@v4

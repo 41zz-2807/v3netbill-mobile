@@ -26,6 +26,9 @@ dependencies:
   # Socket.IO untuk aksi PC dan status realtime. Backend memakai Socket.IO,
   # jadi web_socket_channel biasa tidak bisa dipakai karena Different protocol.
   socket_io_client: ^2.0.3
+  package_info_plus: ^9.0.1
+  path_provider: ^2.1.6
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:

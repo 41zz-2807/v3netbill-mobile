@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Folder yang boleh disajikan FileProvider untuk pembaruan diri.
+
+  Hanya folder milik aplikasi sendiri, bukan `root-path` dan bukan
+  `external-path`: kalau yang ada, provider ini bisa menyajikan berkas apa pun
+  di perangkat hanya karena satu aplikasi zooming.
+
+  APK hasil unduhan disimpan lewat `getTemporaryDirectory()` dari package
+  path_provider, jadi ada tiga nama di sini untuk menutup kemungkinan Android
+  menaruhnya di cache internal atau cache eksternal. Kalau unduhan tidak
+  ditemukan di salah satunya, pasang gagal dengan "Failed to find configured
+  root".
+-->
+<paths>
+    <cache-path
+        name="cache"
+        path="." />
+    <external-cache-path
+        name="cache_app"
+        path="." />
+    <files-path
+        name="files"
+        path="." />
+</paths>

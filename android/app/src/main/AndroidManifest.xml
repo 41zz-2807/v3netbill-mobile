@@ -5,6 +5,12 @@
          melakukan panggilan jaringan. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!-- FITUR PEMBARUAN DIRI: aplikasi mengunduh APK dari backend lalu
+         menyerahkan berkasnya ke installer Android. Android 8 (API 26) ke atas
+         mewajibkan izin ini, dan pengguna harus menyalakannya sendiri di
+         Pengaturan. Tanpa izin tersebut, pemasangan selalu ditolak. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+
     <application
         android:label="v3Netbill"
         android:name="${applicationName}"
@@ -36,13 +42,38 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-    </application>
-    <!-- Required to query activities that can process text, see:
-         https://developer.android.com/training/package-visibility and
-         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
 
-         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+        <!-- FileProvider untuk pembaruan diri.
+             Android 7 (API 24) ke atas menolak `file://` yang datang dari luar
+             aplikasi (FileUriExposedException), jadi APK hasil unduhan wajib
+             disajikan lewat content://. Yang disajikan hanya folder cache milik
+             aplikasi sendiri, jadi tidak ada berkas lain yang bisa dibaca
+             lewat provider ini. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
     <queries>
+        <!-- Installer APK. Android 11+ menyembunyikan aplikasi yang bisa
+             menangani intent, jadi tanpa ini layar pemasangan tidak akan
+             pernah muncul. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:mimeType="application/vnd.android.package-archive"/>
+        </intent>
+        <!-- Required to query activities that can process text, see:
+             https://developer.android.com/training/package-visibility and
+             https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+             In particular, this is used by the Flutter engine in
+             io.flutter.plugin.text.ProcessTextPlugin. -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

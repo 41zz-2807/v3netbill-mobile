@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
+import 'core/apk/apk_repository.dart';
+import 'core/apk/update_provider.dart';
 import 'core/network/api_client.dart';
 import 'core/network/socket_service.dart';
 import 'core/router/app_shell.dart';
@@ -57,6 +59,11 @@ class V3NetbillApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => AccountsProvider(AccountRepository(api)),
+        ),
+        // Pembaruan aplikasi. Dibuat sekali bersama; pengecekan versi dipicu
+        // dari DashboardPage, bukan dari sini, supaya tidak berjalan sebelum login.
+        ChangeNotifierProvider(
+          create: (_) => UpdateProvider(ApkRepository(api)),
         ),
       ],
       child: MaterialApp(

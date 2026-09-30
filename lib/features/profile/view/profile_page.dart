@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/apk/update_provider.dart';
+import '../../../core/apk/view/update_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pcs/providers/pc_provider.dart';
@@ -13,6 +15,14 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final session = auth.session;
+    final update = context.watch<UpdateProvider>();
+    // Ringkas, bukan objek Provider: di rebuild berikutnya object yang sama
+    // akan menggagalkan perbandingan dan memicu build tanpa guna.
+    final statusTeks = switch (update.tahap) {
+      TahapPembaruan.tersedia => 'Ada versi ${update.info?.versiTampil ?? '?'}',
+      TahapPembaruan.siapPasang => 'Siap dipasang',
+      _ => 'Terbaru',
+    };
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -88,6 +98,10 @@ class ProfilePage extends StatelessWidget {
 
         const SizedBox(height: 18),
 
+        // Pembaruan aplikasi. Versi di bawah ini dibaca dari metadata paket,
+        // bukan ditulis manual, jadi selalu benar.
+        const UpdateCard(),
+
         // Ringkasan jumlah PC sengaja tidak ada di sini. Angka yang sama sudah
         // tampil sebagai StatCard di dashboard, jadi di sini hanya info akun
         // dan info server.
@@ -97,18 +111,26 @@ class ProfilePage extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.divider),
           ),
-          child: const Column(
+          child: Column(
             children: [
-              _Row(
+              const _Row(
                 icon: Icons.dns_outlined,
                 label: 'Server',
                 value: 'v3netbill.bilmary.my.id',
               ),
-              Divider(height: 1),
+              const Divider(height: 1),
               _Row(
                 icon: Icons.info_outline,
                 label: 'Versi aplikasi',
-                value: '1.0.0',
+                value: context.select<UpdateProvider, String>(
+                  (u) => u.versiTerpasang,
+                ),
+              ),
+              const Divider(height: 1),
+              _Row(
+                icon: Icons.dns,
+                label: 'Status',
+                value: statusTeks,
               ),
             ],
           ),

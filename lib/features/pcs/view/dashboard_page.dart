@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/apk/update_provider.dart';
+import '../../../core/apk/view/update_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/common.dart';
 import '../providers/pc_provider.dart';
@@ -24,6 +26,10 @@ class _DashboardPageState extends State<DashboardPage>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PcProvider>().init();
+      // Cek pembaruan diam-diam saat Home dibuka. Sengaja tidak di profile atau
+      // initState Provider: `initState` tidak boleh memanggil yang mengembalikan
+      // Future tanpa di-await, dan pengecekan ini memang boleh gagal diam-diam.
+      context.read<UpdateProvider>().cek();
     });
   }
 
@@ -58,6 +64,10 @@ class _DashboardPageState extends State<DashboardPage>
               ),
             ),
           ),
+
+          // Kartu pembaruan. Hanya muncul kalau memang ada yang perlu
+          // dilakukan, jadi tidak memakan tempat saat aplikasi sudah terbaru.
+          const SliverToBoxAdapter(child: UpdateCard(ringkas: true)),
 
           // Ringkasan tiga status
           SliverToBoxAdapter(

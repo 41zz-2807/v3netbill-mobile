@@ -40,4 +40,13 @@ class ApiConfig {
 
   // --- Endpoint laporan ---
   static const reportsToday = '/reports/today';
+
+  // --- Endpoint pembaruan aplikasi ---
+  /// Metadata APK saja (versi, ukuran, sha256). Dipakai aplikasi untuk cek
+  /// pembaruan. Wajib JWT, dan TIDAK boleh diganti `GET /settings` karena itu
+  /// mengembalikan seluruh setting termasuk token bot Telegram dan hash PIN.
+  static const apkInfo = '/settings/apk/info';
+
+  /// Berkas APK-nya sendiri (54 MB). Dipakai hanya setelah versi newer terkonfirmasi.
+  static const apk = '/settings/apk';
 }
