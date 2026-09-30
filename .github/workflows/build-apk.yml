@@ -70,15 +70,22 @@ jobs:
       - name: Tentukan nomor versi
         # PENTING: ini yang membuat fitur "cek pembaruan" di aplikasi bisa
         # bekerja. Seluruh 12 build sebelumnya punya versionCode = 1, jadi
-        # aplikasi tidak punya satu pun angka untuk dibandingkan dengan APK di
-        # server. `github.run_number` selalu naik dan tidak perlu diingat.
+        # aplikasi tidak punya satu pun angka yang bisa dibandingkan dengan APK
+        # di server.
         #
-        # APK yang sudah terpasang di HP kasir sekarang versionCode = 1, jadi
-        # build pertama setelah perubahan ini (run_number 13) otomatis dianggap
-        # lebih baru oleh aplikasi.
+        # Ruang nomor DIPISAH: CI selalu memakai 1000 + run_number, sedangkan
+        # build lokal untuk uji coba memakai angka di bawah 1000. Tanpa
+        # pemisahan ini keduanya bertabrakan. Yang sudah terjadi 30 Sep: build
+        # lokal memakai 13/14/15, CI juga menghasilkan 13/14/15, jadi APK CI
+        # bernomor 13 tidak bisa dipasang di HP yang sudah punya 15 (Android
+        # menolak downgrade) dan nomor yang sama dipakai dua APK berbeda.
+        #
+        # Konsekuensi yang disengaja: setiap APK dari CI selalu dianggap lebih
+        # baru oleh build lokal mana pun. Itu benar, karena APK CI adalah
+        # rilis sungguhan sementara build lokal hanya untuk menguji.
         run: |
-          echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
-          echo "BUILD_NAME=1.0.${{ github.run_number }}" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$((1000 + ${{ github.run_number }}))" >> "$GITHUB_ENV"
+          echo "BUILD_NAME=1.0.$((1000 + ${{ github.run_number }}))" >> "$GITHUB_ENV"
 
       - name: Tampilkan nomor versi
         run: |
