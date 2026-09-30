@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/apk/update_provider.dart';
-import '../../../core/apk/view/update_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pcs/providers/pc_provider.dart';
@@ -98,11 +97,11 @@ class ProfilePage extends StatelessWidget {
 
         const SizedBox(height: 18),
 
-        // Pembaruan aplikasi. Versi di bawah ini dibaca dari metadata paket,
-        // bukan ditulis manual, jadi selalu benar.
-        const UpdateCard(),
-
-        // Ringkasan jumlah PC sengaja tidak ada di sini. Angka yang sama sudah
+        // Kartu pembaruan sengaja tidak ada di sini. Notifikasi pembaruan
+        // hanya di Home, supaya tidak muncul dua kali di tempat yang berdekatan.
+        // Baris "Status" di bawah tetap memberi tahu kalau ada versi baru.
+        //
+        // Ringkasan jumlah PC juga tidak ada di sini. Angka yang sama sudah
         // tampil sebagai StatCard di dashboard, jadi di sini hanya info akun
         // dan info server.
         Container(
@@ -211,8 +210,13 @@ class _Row extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          const Spacer(),
-          Flexible(
+          const SizedBox(width: 12),
+          // Expanded, bukan Spacer + Flexible. Spacer dan Flexible sama-sama
+          // flex 1, jadi ruang sisa dibagi dua sama besar dan nilai yang
+          // lebih pendek dari bagiannya berhenti di tengah, tidak menempel
+          // tepi kanan. Expanded membuat nilai memakai seluruh sisa ruang,
+          // lalu textAlign: right menaruhnya di tepi kanan kotak itu.
+          Expanded(
             child: Text(
               value,
               maxLines: 1,
