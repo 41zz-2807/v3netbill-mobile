@@ -107,6 +107,7 @@ void main() {
     // Tombol aksi sekarang ikon saja tanpa keterangan, jadi dicari lewat ikon.
     // Label teksnya pindah ke tooltip, yang tidak dirender sampai dipanggil.
     for (final ikon in [
+      Icons.play_arrow,
       Icons.add,
       Icons.remove,
       Icons.block,

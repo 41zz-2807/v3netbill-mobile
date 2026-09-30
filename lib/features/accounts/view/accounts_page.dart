@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../pcs/providers/pc_provider.dart';
 import '../../../shared/utils/formatters.dart';
 import '../../../shared/utils/rupiah_input.dart';
 import '../../../shared/widgets/account_create_sheet.dart';
 import '../../../shared/widgets/common.dart';
 import '../models/account.dart';
 import '../providers/accounts_provider.dart';
+import 'widgets/pilih_pc_sheet.dart';
 
 /// Halaman Voucher & Member: tab switcher, pencarian, daftar, dan aksi
 /// massal saat ada yang dipilih.
@@ -125,6 +127,7 @@ class _AccountsPageState extends State<AccountsPage>
                     ),
                     onChangePassword: () => _gantiPassword(context, p),
                     onRevoke: () => _confirmRevoke(context, p),
+                    onStartPc: () => _mulaiSesi(context, p),
                   ),
           ),
 
@@ -376,6 +379,64 @@ class _AccountsPageState extends State<AccountsPage>
     _toast(context, ok ? 'Akun dinonaktifkan.' : 'Gagal menonaktifkan.', ok);
   }
 
+  /// Mulai sesi dari akun yang sedang dipilih, di PC pilihan operator.
+  ///
+  /// Alur ini kebalikan dari yang ada di kartu PC di Home: di sana kasir
+  /// memilih PC dulu lalu mengetik kode, di sini kasir memilih akun dulu lalu
+  /// memilih PC. Dua-duanya perlu — kasir yang sudah di halaman Member tidak
+  /// akan naik ke Home hanya untuk mencari PC.
+  Future<void> _mulaiSesi(BuildContext context, AccountsProvider p) async {
+    // Satu sesi memakai tepat satu akun. Memilih banyak lalu memulai semuanya
+    // akan sangat membingungkan, jadi tolak di sini, bukan setelah server
+    // menjawab.
+    if (p.selectedCount != 1) {
+      _toast(context, 'Pilih tepat satu akun untuk memulai sesi.', false);
+      return;
+    }
+
+    final akun = p.all.firstWhere((a) => p.isSelected(a.id));
+
+    // Ditegakkan sebelum memanggil server supaya pesannya jelas. Backend juga
+    // akan menolak, tapi "Waktu voucher habis" dari server tidak menjelaskan
+    // bahwa masalahnya sudah terlihat sejak tadi di daftar.
+    if (akun.status != AccountStatus.active) {
+      _toast(context, 'Akun ini sudah dinonaktifkan.', false);
+      return;
+    }
+    if (akun.isHabis) {
+      _toast(
+        context,
+        akun.tipe == AccountType.member
+            ? 'Saldo waktu member habis.'
+            : 'Waktu voucher habis.',
+        false,
+      );
+      return;
+    }
+
+    final pcs = context.read<PcProvider>().pcs;
+    if (!context.mounted) return;
+    final pc = await showPilihPcSheet(
+      context,
+      daftarPc: pcs,
+      namaAkun: akun.displayName,
+    );
+    if (pc == null || !context.mounted) return;
+
+    final galat = await context
+        .read<PcProvider>()
+        .startSession(pcId: pc.id, kode: akun.displayName);
+    if (!context.mounted) return;
+    _toast(
+      context,
+      galat ?? 'Sesi ${akun.displayName} dimulai di ${pc.namaPc}.',
+      galat == null,
+    );
+    if (galat == null) {
+      p.clearSelection();
+    }
+  }
+
   void _toast(BuildContext context, String msg, bool ok) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -480,6 +541,7 @@ class _SelectionBar extends StatelessWidget {
     required this.onWithdraw,
     required this.onRevoke,
     required this.onChangePassword,
+    required this.onStartPc,
   });
 
   final VoidCallback onClear;
@@ -487,6 +549,7 @@ class _SelectionBar extends StatelessWidget {
   final VoidCallback onWithdraw;
   final VoidCallback onRevoke;
   final VoidCallback onChangePassword;
+  final VoidCallback onStartPc;
 
   @override
   Widget build(BuildContext context) {
@@ -497,9 +560,14 @@ class _SelectionBar extends StatelessWidget {
         gradient: AppColors.brandGradientSoft,
         borderRadius: BorderRadius.circular(12),
       ),
+      // spaceEvenly, bukan `MainAxisAlignment.spaceBetween` dengan teks.
+      // Versi lama memakai label teks + chip dan total lebarnya melebihi layar
+      // HP: Flutter melaporkan RenderFlex overflowed by 261 pixels pada 390 px.
+      // Sekarang hanya ikon, dan lebar tetap diuji di test.
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          _ikon(Icons.play_arrow, 'Mulai di PC', onStartPc),
           _ikon(Icons.add, 'Topup', onTopup),
           _ikon(Icons.remove, 'Tarik', onWithdraw),
           _ikon(Icons.block, 'Revoke', onRevoke),
