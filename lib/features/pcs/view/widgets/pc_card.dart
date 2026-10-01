@@ -49,6 +49,15 @@ class PcCard extends StatelessWidget {
         ? (AppColors.active, AppColors.activeSoft)
         : (color, soft);
 
+    // Sesi sedang berjalan? Dipakai untuk memilih tombol mana yang tampil.
+    //
+    // `status == active` ikut diperiksa sebagai samping `hasSession`, karena
+    // backend menolak PC yang sedang berjalan berdasarkan status, dan
+    // `session` bisa null walau statusnya masih ACTIVE sesaat setelah sisi
+    // server berubah. Tanpa itu, kasir bisa menekan "Mulai Sesi" di PC yang
+    // sedang berjalan lalu ditolak dengan "PC sudah memiliki sesi berjalan".
+    final sedangBerjalan = pc.hasSession || pc.status == PcStatus.active;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -150,47 +159,36 @@ class PcCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // Aksi utama
-
+          // Aksi utama: tepat DUA tombol, dan tombol yang pertama bergantian.
+          //
+          // Versi lama menampilkan "Mulai Sesi" dan "Akhiri Sesi" BERJALAN
+          // bersamaan. Itu salah karena keduanya dua aksi yang bertentangan.
           SizedBox(
             width: double.infinity,
             child: PcActionButton(
-              label: 'Mulai Sesi',
-              icon: Icons.play_arrow,
-              color: AppColors.active,
+              label: sedangBerjalan ? 'Akhiri Sesi' : 'Mulai Sesi',
+              icon: sedangBerjalan ? Icons.lock_outline : Icons.play_arrow,
+              color: sedangBerjalan ? AppColors.idle : AppColors.active,
               enabled: pc.status.canOperate && !busy,
               loading: busy,
-              onTap: () => _startSession(context, provider),
+              onTap: () => sedangBerjalan
+                  ? _confirmEnd(context, provider)
+                  : _startSession(context, provider),
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              // Backend tidak punya perintah stop terpisah untuk operator.
-              // Mengakhiri sesi dan mengunci layar memakai perintah yang sama,
-              // jadi dua tombol itu digabung di sini.
-              Expanded(
-                child: PcActionButton(
-                  label: 'Akhiri Sesi',
-                  icon: Icons.lock_outline,
-                  color: AppColors.idle,
-                  enabled: pc.status.canOperate && !busy,
-                  loading: busy,
-                  onTap: () => _confirmEnd(context, provider),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: PcActionButton(
-                  label: 'Matikan',
-                  icon: Icons.power_settings_new,
-                  color: AppColors.danger,
-                  enabled: pc.status.canOperate && !busy,
-                  loading: busy,
-                  onTap: () => _confirmShutdown(context, provider),
-                ),
-              ),
-            ],
+
+          // Tombol kedua selalu sama: mematikan PC bukan aksi yang bergantian.
+          SizedBox(
+            width: double.infinity,
+            child: PcActionButton(
+              label: 'Matikan',
+              icon: Icons.power_settings_new,
+              color: AppColors.danger,
+              enabled: pc.status.canOperate && !busy,
+              loading: busy,
+              onTap: () => _confirmShutdown(context, provider),
+            ),
           ),
         ],
       ),
