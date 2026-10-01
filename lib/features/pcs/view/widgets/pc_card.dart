@@ -59,7 +59,9 @@ class PcCard extends StatelessWidget {
     final sedangBerjalan = pc.hasSession || pc.status == PcStatus.active;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      // 12, bukan 16. Card ini diulang untuk setiap PC, jadi tiap 4 px yang
+      // dihemat di sini dikalikan sepuluh pada dashboard yang penuh.
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(16),
@@ -115,9 +117,9 @@ class PcCard extends StatelessWidget {
 
           // Info sesi yang sedang berjalan, kalau ada.
           if (pc.hasSession) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.bgCardAlt,
                 borderRadius: BorderRadius.circular(10),
@@ -157,38 +159,47 @@ class PcCard extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: 12),
-
-          // Aksi utama: tepat DUA tombol, dan tombol yang pertama bergantian.
+          // Aksi utama: tepat DUA tombol, berdampingan.
           //
-          // Versi lama menampilkan "Mulai Sesi" dan "Akhiri Sesi" BERJALAN
-          // bersamaan. Itu salah karena keduanya dua aksi yang bertentangan.
-          SizedBox(
-            width: double.infinity,
-            child: PcActionButton(
-              label: sedangBerjalan ? 'Akhiri Sesi' : 'Mulai Sesi',
-              icon: sedangBerjalan ? Icons.lock_outline : Icons.play_arrow,
-              color: sedangBerjalan ? AppColors.idle : AppColors.active,
-              enabled: pc.status.canOperate && !busy,
-              loading: busy,
-              onTap: () => sedangBerjalan
-                  ? _confirmEnd(context, provider)
-                  : _startSession(context, provider),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Tombol kedua selalu sama: mematikan PC bukan aksi yang bergantian.
-          SizedBox(
-            width: double.infinity,
-            child: PcActionButton(
-              label: 'Matikan',
-              icon: Icons.power_settings_new,
-              color: AppColors.danger,
-              enabled: pc.status.canOperate && !busy,
-              loading: busy,
-              onTap: () => _confirmShutdown(context, provider),
-            ),
+          // Tombol pertama BERGANTIAN: "Mulai Sesi" kalau belum ada sesi,
+          // "Akhiri Sesi" kalau sedang berjalan. Dulu keduanya muncul
+          // bersamaan, dan itu menyesatkan karena dua aksi yang bertentangan:
+          // kasir bisa menekan "Mulai Sesi" di PC yang sedang berjalan lalu
+          // ditolak dengan "PC sudah memiliki sesi berjalan".
+          //
+          // Tombol kedua "Matikan" selalu sama, karena mematikan PC bukan aksi
+          // yang bergantian.
+          //
+          // Berdampingan, bukan bertumpuk. Versi bertumpuk menambah tinggi
+          // card sekitar 50 px per PC, dan dengan sepuluh PC di dashboard itu
+          // panjangnya melebihi satu layar.
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: PcActionButton(
+                  label: sedangBerjalan ? 'Akhiri Sesi' : 'Mulai Sesi',
+                  icon: sedangBerjalan ? Icons.lock_outline : Icons.play_arrow,
+                  color: sedangBerjalan ? AppColors.idle : AppColors.active,
+                  enabled: pc.status.canOperate && !busy,
+                  loading: busy,
+                  onTap: () => sedangBerjalan
+                      ? _confirmEnd(context, provider)
+                      : _startSession(context, provider),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: PcActionButton(
+                  label: 'Matikan',
+                  icon: Icons.power_settings_new,
+                  color: AppColors.danger,
+                  enabled: pc.status.canOperate && !busy,
+                  loading: busy,
+                  onTap: () => _confirmShutdown(context, provider),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -482,6 +493,10 @@ class PcActionButton extends StatelessWidget {
           child: Container(
             height: 42,
             alignment: Alignment.center,
+            // Padding horizontalnya kecil karena labelnya bisa dipotong
+            // ellipsis. Dua tombol berbagi lebar card, jadi ruang teksnya
+            // sempit; tanpa ini "Mulai Sesi" meluber di HP layar sempit.
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: loading
                 ? SizedBox(
                     height: 16,
@@ -493,15 +508,23 @@ class PcActionButton extends StatelessWidget {
                   )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(icon, size: 15, color: color),
                       const SizedBox(width: 5),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                      // Flexible, bukan Text polos: dua tombol berbagi lebar
+                      // card, jadi labelnya harus boleh dipotong ellipsis
+                      // alih-alih memicu overflow di layar sempit.
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ],

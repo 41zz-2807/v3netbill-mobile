@@ -172,4 +172,45 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  // Tinggi card diukur, bukan dikira-kira. Versi bertumpuk menambah tinggi
+  // card sekitar 50 px per PC, dan dengan sepuluh PC di dashboard panjangnya
+  // melebihi satu layar.
+  group('tinggi card', () {
+    testWidgets('PC idle lebih pendek dari 130 px', (tester) async {
+      diLebarHp(tester, 390);
+      await pumpCard(tester, _pc(status: PcStatus.idle));
+      final tinggi = tester.getSize(find.byType(PcCard)).height;
+      // ignore: avoid_print
+      print('tinggi card PC idle      : $tinggi');
+      expect(tinggi, lessThan(130));
+    });
+
+    testWidgets('PC dengan sesi lebih pendek dari 175 px', (tester) async {
+      diLebarHp(tester, 390);
+      await pumpCard(
+        tester,
+        _pc(status: PcStatus.active, denganSesi: true),
+      );
+      final tinggi = tester.getSize(find.byType(PcCard)).height;
+      // ignore: avoid_print
+      print('tinggi card PC + sesi    : $tinggi');
+      expect(tinggi, lessThan(175));
+    });
+
+    testWidgets('dua tombol berdampingan, bukan bertumpuk', (tester) async {
+      diLebarHp(tester, 390);
+      await pumpCard(tester, _pc(status: PcStatus.idle));
+
+      final kiri = tester.getRect(find.text('Mulai Sesi'));
+      final kanan = tester.getRect(find.text('Matikan'));
+      // Berdampingan berarti keduanya berada pada tinggi yang sama dan berada
+      // di kolom yang berbeda. Kalau bertumpuk, `kanan.left` akan sama dengan
+      // `kiri.left` karena keduanya melebar penuh.
+      expect(kanan.top, closeTo(kiri.top, 1),
+          reason: 'tinggi barisnya harus sama');
+      expect(kanan.left, greaterThan(kiri.left + 100),
+          reason: 'Matikan harus di sebelah kanan, bukan di bawah');
+    });
+  });
 }
