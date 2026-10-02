@@ -7,6 +7,12 @@ import 'package:v3netbill_mobile/core/theme/app_colors.dart';
 /// Dialognya dibuka dari `PcCard`, jadi widget ini disalin apa adanya ke sini
 /// supaya yang diuji benar-benar lebar yang sama. Kalau refactor nanti mengubah
 /// tombolnya, tes ini harus ikut diperbarui — itu memang gunanya.
+///
+/// ⚠️ Dan salinan itu punya konsekuensi yang harus diingat: **versi pertama
+/// berkas ini menyalin `maxLength: 6` + `keyboardType: TextInputType.number`
+/// apa adanya**, jadi tesnya lulus padahal aplikasi tidak bisa menerima nama
+/// member sama sekali. Tes yang menyalin konfigurasi produksi tanpa
+/// verificasinya hanya mengulang konfigurasi itu — bukan mengujinya.
 Future<void> bukaDialogMulaiSesi(BuildContext context) {
   return showDialog<void>(
     context: context,
@@ -21,9 +27,13 @@ Future<void> bukaDialogMulaiSesi(BuildContext context) {
           ),
           const SizedBox(height: 16),
           const TextField(
-            maxLength: 6,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: 'Kode', counterText: ''),
+            maxLength: 40,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(
+              labelText: 'Kode voucher atau nama member',
+              counterText: '',
+            ),
           ),
           const SizedBox(height: 12),
           const Divider(height: 1),
@@ -147,6 +157,45 @@ void main() {
       member.top,
       reason: 'keduanya harus sebaris, kalau tidak tombolnya yang turun baris',
     );
+  });
+
+  testWidgets('nama member dengan huruf dan spasi bisa diketik utuh', (
+    tester,
+  ) async {
+    await bukaDanSiap(tester);
+
+    // ⚠️ Nama member adalah KREDENSIAL sesi — backend mencocokkan `nama`, dan
+    // member tidak punya kodeUnik sama sekali. Jadi field ini wajib menerima
+    // huruf dan spasi.
+    //
+    // Dengan `keyboardType: TextInputType.number` keyboard di HP hanya punya
+    // tombol angka, dan dengan `maxLength: 6` teks terpotong diam-diam —
+    // dua-duanya membuat member tidak bisa dipakai dari dialog ini.
+    const nama = 'Budi Santoso';
+    await tester.enterText(find.byType(TextField), nama);
+
+    // Field di fixture ini tidak punya controller sendiri, jadi teksnya dibaca
+    // dari EditableText yang benar-benar memegang isi kolom.
+    final isi = tester.widget<EditableText>(find.byType(EditableText)).controller.text;
+    expect(
+      isi,
+      nama,
+      reason: 'nama member tidak boleh terpotong atau ditolak',
+    );
+    expect(isi.length, greaterThan(6));
+  });
+
+  testWidgets('keyboard field kode bukan keyboard angka', (tester) async {
+    await bukaDanSiap(tester);
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(
+      field.keyboardType,
+      isNot(TextInputType.number),
+      reason: 'keyboard angka membuat member tidak bisa diketik sama sekali',
+    );
+    // Batas karakter harus mengikuti `maksKarakterNama` (40), bukan 6.
+    expect(field.maxLength, greaterThanOrEqualTo(40));
   });
 
   testWidgets('dialog tidak meluber keluar layar di 390px', (tester) async {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/utils/formatters.dart';
+import '../../../../shared/utils/rupiah_input.dart';
 import '../../../../shared/widgets/account_create_sheet.dart';
 import '../../../../shared/widgets/common.dart';
 import '../../../accounts/models/account.dart';
@@ -234,11 +235,29 @@ class PcCard extends StatelessWidget {
             TextField(
               controller: kodeCtrl,
               autofocus: true,
-              maxLength: 6,
-              keyboardType: TextInputType.number,
+              // ⚠️ Field ini menerima KODE VOUCHER **dan** NAMA MEMBER.
+              //
+              // Dulu `keyboardType: TextInputType.number` + `maxLength: 6`,
+              // yang benar-benar membuat member tidak bisa dipakai dari
+              // dialog ini: keyboard yang muncul hanya punya tombol angka,
+              // dan nama yang lebih dari 6 karakter terpotong diam-diam.
+              //
+              // Member tidak punya kodeUnik sama sekali — backend mencari
+              // lewat `nama` (session.service.ts), dan `nama` boleh huruf,
+              // spasi, sampai `maksKarakterNama` karakter. Jadi batas dan
+              // keyboard harus mengikuti worst case, bukan voucher.
+              //
+              // ⚠️ Jangan tambahkan `textCapitalization` di sini. Backend
+              // mencocokkan `nama` TANPA `mode: 'insensitive'`, jadi mengubah
+              // huruf saat diketik berisiko membuat nama yang diketik berbeda
+              // dari yang tertulis di kartu pelanggan.
+              maxLength: maksKarakterNama,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => Navigator.pop(ctx, _MulaiAksi.pakaiKode),
               style: const TextStyle(color: AppColors.textPrimary),
               decoration: const InputDecoration(
-                labelText: 'Kode',
+                labelText: 'Kode voucher atau nama member',
                 counterText: '',
               ),
             ),
