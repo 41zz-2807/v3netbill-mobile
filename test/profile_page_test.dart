@@ -35,6 +35,9 @@ class _FakeAuthRepository implements AuthRepository {
       sesi;
 
   @override
+  Future<String?> savedUsername() async => null;
+
+  @override
   Future<UserSession?> restore() async => sesi;
 
   @override

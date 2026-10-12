@@ -27,6 +27,9 @@ class _FakeAuthRepository implements AuthRepository {
       );
 
   @override
+  Future<String?> savedUsername() async => 'admin';
+
+  @override
   Future<void> logout() async {}
 }
 
@@ -46,6 +49,9 @@ class _FakeAuthRepositoryKasir implements AuthRepository {
         role: 'KASIR',
         username: 'kasir',
       );
+
+  @override
+  Future<String?> savedUsername() async => 'kasir';
 
   @override
   Future<void> logout() async {}

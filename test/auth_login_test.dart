@@ -23,8 +23,22 @@ class _StorePalsu extends SecureStore {
     required String token,
     required String role,
     required String username,
-  }) async =>
-      isi['token'] = token;
+    // ⚠️ WAJIB ada di sini juga. Override di Dart harus menerima seluruh
+    // named parameter yang dimiliki kelas induknya — tambah satu parameter
+    // opsional di [SecureStore] tanpa memperbarui semua fake akan membuat
+    // file tes GAGAL COMPILE, bukan gagal assertion.
+    String? password,
+  }) async {
+    isi['token'] = token;
+    if (password != null) isi['password'] = password;
+  }
+
+  @override
+  Future<String?> readPassword() async => isi['password'];
+
+  @override
+  Future<bool> bisaLoginUlang() async =>
+      (isi['username'] ?? '').isNotEmpty && (isi['password'] ?? '').isNotEmpty;
 
   @override
   Future<void> clear() async {
@@ -70,8 +84,7 @@ ApiClient _clientStub(_StorePalsu store, {int status = 401, Object? body}) {
       validateStatus: (s) => s != null && s < 500,
     ),
   );
-  dio.httpClientAdapter =
-      _AdapterPalsu(status, body ?? {'statusCode': status});
+  dio.httpClientAdapter = _AdapterPalsu(status, body ?? {'statusCode': status});
   return ApiClient(secureStore: store, dio: dio);
 }
 

@@ -16,6 +16,7 @@ class SecureStore {
   static const _kToken = 'v3netbill_token';
   static const _kRole = 'v3netbill_role';
   static const _kUsername = 'v3netbill_username';
+  static const _kPassword = 'v3netbill_password';
   static const _kNotifikasiSesi = 'v3netbill_notif_sesi';
 
   /// Kunci ini harus sama dengan yang dipakai aplikasi web, supaya saat
@@ -29,15 +30,44 @@ class SecureStore {
     required String token,
     required String role,
     required String username,
+    String? password,
   }) async {
     await _storage.write(key: _kToken, value: token);
     await _storage.write(key: _kRole, value: role);
     await _storage.write(key: _kUsername, value: username);
+    // ⚠️ Password ikut disimpan supaya login bisa diperpanjang sendiri saat
+    // token JWT kedaluwarsa (umur token 24 jam, lihat auth.module.ts di
+    // backend). Tanpa ini kasir harus mengetik username dan password setiap
+    // hari aunque HP-nya tidak pernah disentuh.
+    //
+    // ⚠️ Ini menyimpan password apa adanya. Yang membuatnya tidak langsung
+    // terbaca adalah `FlutterSecureStorage` (EncryptedSharedPreferences di
+    // Android), jadi isinya terenkripsi di HP. Tapi ini tetap elevate risiko
+    // dibanding menyimpan token saja: HP yang di-root atau diambil orang bisa
+    // membacanya, dan password ini juga sah untuk login dari mana pun.
+    //
+    // Password yang sudah TERSIMPAN dari versi lama tidak dihapus kalau
+    // `password` null — yang terjadi cuma tidak ada pembaruan.
+    if (password != null && password.isNotEmpty) {
+      await _storage.write(key: _kPassword, value: password);
+    }
   }
 
   Future<String?> readToken() => _storage.read(key: _kToken);
   Future<String?> readRole() => _storage.read(key: _kRole);
   Future<String?> readUsername() => _storage.read(key: _kUsername);
+
+  /// Password untuk login ulang otomatis. Null kalau belum pernah disimpan,
+  /// dan itu berarti aplikasi harus menampilkan layar login seperti biasa.
+  Future<String?> readPassword() => _storage.read(key: _kPassword);
+
+  /// True kalau username DAN password tersimpan, jadi login ulang otomatis
+  /// mungkin dilakukan. Dipakai [AuthProvider] untuk memutuskan.
+  Future<bool> bisaLoginUlang() async {
+    final u = (await readUsername())?.trim() ?? '';
+    final p = await readPassword();
+    return u.isNotEmpty && p != null && p.isNotEmpty;
+  }
 
   Future<bool> hasSession() async {
     final t = await readToken();
@@ -48,6 +78,10 @@ class SecureStore {
     await _storage.delete(key: _kToken);
     await _storage.delete(key: _kRole);
     await _storage.delete(key: _kUsername);
+    // ⚠️ Password ikut dihapus. Meninggalkannya berarti siapa pun yang
+    // berhasil membuka aplikasi setelah kasir logout masih punya kredensial
+    // untuk login ulang otomatis — persis yang harus hilang saat logout.
+    await _storage.delete(key: _kPassword);
     // KUNCI `_kNotifikasiSesi` SENGAJA TIDAK dihapus di sini.
     //
     // Ini preferensi perangkat, bukan bagian dari sesi login. Kalau ikut

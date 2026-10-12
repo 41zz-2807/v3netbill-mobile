@@ -22,6 +22,19 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscure = true;
 
   @override
+  void initState() {
+    super.initState();
+    // ⚠️ Username diisi dari penyimpanan, password TIDAK. Password disimpan
+    // untuk login ulang otomatis, tapi menuliskannya ke form membuat
+    // kredensial itu terlihat di layar — dan field password tidak pernah
+    // diisi ulang sendiri di aplikasi manapun yang benar.
+    final u = context.read<AuthProvider>().lastUsername;
+    if (u != null && u.isNotEmpty) {
+      _usernameCtrl.text = u;
+    }
+  }
+
+  @override
   void dispose() {
     _usernameCtrl.dispose();
     _passwordCtrl.dispose();

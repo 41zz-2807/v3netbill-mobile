@@ -35,14 +35,21 @@ class AuthProvider extends ChangeNotifier {
   AuthStatus _status = AuthStatus.checking;
   UserSession? _session;
   String? _error;
+  String? _lastUsername;
 
   AuthStatus get status => _status;
   UserSession? get session => _session;
   String? get error => _error;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
 
+  /// Username terakhir yang dipakai, untuk mengisi form login lagi.
+  String? get lastUsername => _lastUsername;
+
   /// Dipanggil sekali saat aplikasi dibuka.
   Future<void> bootstrap() async {
+    // Dibaca sebelum `restore()` supaya tetap terisi walau token sudah
+    // tidak ada — justru itu kasus yang paling butuh username terisi.
+    _lastUsername = await _repo.savedUsername();
     final s = await _repo.restore();
     _session = s;
     _status = s == null ? AuthStatus.unauthenticated : AuthStatus.authenticated;
@@ -74,6 +81,7 @@ class AuthProvider extends ChangeNotifier {
         username: username.trim(),
         password: password,
       );
+      _lastUsername = username.trim();
       _status = AuthStatus.authenticated;
       notifyListeners();
       // Jangan ditunggu: login sudah berhasil dan kasir tidak boleh menunggu

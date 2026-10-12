@@ -80,10 +80,67 @@ class ApiClient {
     return _guard(() => _dio.delete<dynamic>(path, data: data));
   }
 
+  /// Cegah login ulang berulang.
+  ///
+  /// ⚠️ Tanpa ini, kalau password tersimpan ternyata sudah tidak berlaku,
+  /// setiap request akan mencoba login ulang lagi — dan setiap percobaan itu
+  /// juga dibalas 401, sehingga satu taps bisa memicu puluhan request ke
+  /// server. Sekali sudah gagal, berhenti.
+  bool _sedangLoginUlang = false;
+
+  /// Login ulang diam-diam memakai username + password yang tersimpan.
+  ///
+  /// Dipanggil hanya saat server membalas 401 padahal request-nya membawa
+  /// token — artinya token JWT-nya kedaluwarsa, bukan kredensial yang salah.
+  ///
+  /// Mengembalikan true kalau token baru berhasil disimpan, sehingga
+  /// pemanggil boleh mengulang request aslinya.
+  Future<bool> _loginUlangOtomatis() async {
+    if (_sedangLoginUlang) return false;
+    _sedangLoginUlang = true;
+    try {
+      final bisa = await _secureStore.bisaLoginUlang();
+      if (!bisa) return false;
+
+      final username = (await _secureStore.readUsername())?.trim() ?? '';
+      final password = await _secureStore.readPassword() ?? '';
+
+      // ⚠️ Pakai `_dio` langsung, BUKAN `post()`. `post()` melewati `_guard`
+      // lagi, dan itu akan membuat 401 dari endpoint login ikut memicu
+      // login ulang lagi — tanpa akhir.
+      final res = await _dio.post<dynamic>(
+        ApiConfig.login,
+        data: {'username': username, 'password': password},
+      );
+      final data = res.data;
+      if (res.statusCode != 200 || data is! Map) return false;
+
+      final token = (data['access_token'] ?? data['accessToken'])?.toString();
+      if (token == null || token.isEmpty) return false;
+
+      final role =
+          (data['role'] ?? await _secureStore.readRole() ?? 'KASIR').toString();
+
+      await _secureStore.saveSession(
+        token: token,
+        role: role,
+        username: username,
+      );
+      return true;
+    } catch (_) {
+      // Kegagalan apa pun di sini berarti "tidak bisa login ulang", dan itu
+      // ditangani pemanggil. Jangan lempar: yang penting tidak crash.
+      return false;
+    } finally {
+      _sedangLoginUlang = false;
+    }
+  }
+
   /// Membungkus pemanggilan dan mengubah error menjadi [ApiException].
   Future<dynamic> _guard(
-    Future<Response<dynamic>> Function() call,
-  ) async {
+    Future<Response<dynamic>> Function() call, {
+    bool sudahCobaLoginUlang = false,
+  }) async {
     // PENTING: 401 HANYA bermakna "token tidak valid" kalau permintaan ini
     // benar-benar membawa token. `POST /auth/login` tidak butuh token, jadi
     // 401 dari sana berarti username atau password salah.
@@ -112,6 +169,18 @@ class ApiClient {
             statusCode: 401,
           );
         }
+
+        // ⚠️ Tokennya kedaluwarsa (umur JWT 24 jam). Coba perpanjang sesi
+        // sendiri dulu sebelum buang apa pun — versi lama langsung menghapus
+        // sesi di sini, jadi kasir harus mengetik username dan password lagi
+        // setiap hari walaupun HP-nya tidak pernah disentuh.
+        if (!sudahCobaLoginUlang && await _loginUlangOtomatis()) {
+          // Token baru sudah tersimpan, jadi header Authorization pada
+          // interceptor akan memakainya. Ulang request ASLINYA — tepat satu
+          // kali, ditandai flag supaya tidak menjadi loop.
+          return _guard(call, sudahCobaLoginUlang: true);
+        }
+
         await _secureStore.clear();
         onUnauthorized?.call();
         throw ApiException(
