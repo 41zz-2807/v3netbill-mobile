@@ -149,14 +149,49 @@ void main() {
     expect(find.text('Mulai Sesi'), findsNothing);
   });
 
-  testWidgets('PC offline: tidak ada tombol yang bisa ditekan', (tester) async {
+  testWidgets('PC offline tanpa sesi: "Mulai Sesi" dan "Matikan" mati', (
+    tester,
+  ) async {
+    // Tanpa sesi, tidak ada yang bisa diakhiri, dan "Mulai Sesi" di PC gelap
+    // akan sia-sia. Jadi dua tombol mati memang benar di sini.
     await pumpCard(tester, _pc(status: PcStatus.offline));
 
-    final tombol = tester.widgetList<PcActionButton>(find.byType(PcActionButton));
+    final tombol =
+        tester.widgetList<PcActionButton>(find.byType(PcActionButton));
     expect(tombol, hasLength(2), reason: 'harus tetap tepat dua tombol');
     for (final t in tombol) {
       expect(t.enabled, isFalse);
     }
+  });
+
+  testWidgets('PC offline TAPI ada sesi: "Akhiri Sesi" tetap bisa ditekan', (
+    tester,
+  ) async {
+    // ⚠️ Ini keadaan setelah mati listrik total: `Session` di database tetap
+    // BERJALAN (jadi hitung mundurnya jalan) sementara agent PC-nya masih
+    // mati, jadi statusnya OFFLINE.
+    //
+    // Versi lama mengunci kedua tombol dari `canOperate`, jadi kasir melihat
+    // timer berjalan tanpa bisa menghentikan tagihan sama sekali.
+    await pumpCard(tester, _pc(status: PcStatus.offline, denganSesi: true));
+
+    expect(find.text('Akhiri Sesi'), findsOneWidget);
+    expect(find.text('Matikan'), findsOneWidget);
+
+    final tombol =
+        tester.widgetList<PcActionButton>(find.byType(PcActionButton)).toList();
+    expect(tombol, hasLength(2), reason: 'harus tetap tepat dua tombol');
+    // Yang pertama = "Akhiri Sesi" (sesi ada), yang kedua = "Matikan".
+    expect(
+      tombol[0].enabled,
+      isTrue,
+      reason: 'mengakhiri sesi tidak butuh PC hidup',
+    );
+    expect(
+      tombol[1].enabled,
+      isFalse,
+      reason: 'mematikan PC gelap tidak mungkin',
+    );
   });
 
   testWidgets('dua tombol tidak meluber di lebar HP 360 px', (tester) async {

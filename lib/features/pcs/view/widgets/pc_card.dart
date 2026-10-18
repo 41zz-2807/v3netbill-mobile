@@ -59,6 +59,27 @@ class PcCard extends StatelessWidget {
     // sedang berjalan lalu ditolak dengan "PC sudah memiliki sesi berjalan".
     final sedangBerjalan = pc.hasSession || pc.status == PcStatus.active;
 
+    // ⚠️ Tiga aksi ini TIDAK butuh kondisi yang sama, dan dulu semuanya
+    // memakai satu gerbang `canOperate`.
+    //
+    // Akibatnya setelah mati listrik total, kartu menampilkan kotak sesi
+    // dengan hitung mundur yang terus jalan (`pc.hasSession`, dipakai di
+    // bawah) tetapi KEDUA tombol mati: `enabled: false` dan `onTap: null`.
+    // Kasir melihat timer berjalan tapi tidak bisa mengubah apa pun, dan
+    // tidak ada penjelasan kenapa. Persis yang dilaporkan.
+    //
+    // "Akhiri Sesi" adalah operasi SISI SERVER: `dashboard:lock_pc` ->
+    // `unlockPc()` -> `stopSession()` hanya menulis ke database. PC tidak
+    // perlu hidup supaya uang pelanggan berhenti tertagih. Justru di PC yang
+    // tidak bisa dihubungi itulah tombol ini paling dibutuhkan.
+    //
+    // "Mulai Sesi" dan "Matikan" tetap memakai `canOperate`: yang pertama
+    // akan membuat sesi di PC yang gelap (sia-sia), yang kedua secara
+    // harfiah tidak bisa sampai karena tidak ada yang menjalankan perintah itu.
+    final bolehAkhiriSesi = !busy;
+    final bolehMulaiSesi = pc.status.canOperate && !busy;
+    final bolehMatikan = pc.status.canOperate && !busy;
+
     return Container(
       // 12, bukan 16. Card ini diulang untuk setiap PC, jadi tiap 4 px yang
       // dihemat di sini dikalikan sepuluh pada dashboard yang penuh.
@@ -182,7 +203,7 @@ class PcCard extends StatelessWidget {
                   label: sedangBerjalan ? 'Akhiri Sesi' : 'Mulai Sesi',
                   icon: sedangBerjalan ? Icons.lock_outline : Icons.play_arrow,
                   color: sedangBerjalan ? AppColors.idle : AppColors.active,
-                  enabled: pc.status.canOperate && !busy,
+                  enabled: sedangBerjalan ? bolehAkhiriSesi : bolehMulaiSesi,
                   loading: busy,
                   onTap: () => sedangBerjalan
                       ? _confirmEnd(context, provider)
@@ -195,7 +216,7 @@ class PcCard extends StatelessWidget {
                   label: 'Matikan',
                   icon: Icons.power_settings_new,
                   color: AppColors.danger,
-                  enabled: pc.status.canOperate && !busy,
+                  enabled: bolehMatikan,
                   loading: busy,
                   onTap: () => _confirmShutdown(context, provider),
                 ),

@@ -17,7 +17,16 @@ enum PcStatus {
         PcStatus.offline => 'Offline',
       };
 
-  /// PC offline tidak punya sesi, jadi tidak bisa dikunci atau dimatikan.
+  /// PC-nya masih bisa dihubungi, jadi perintahnya bisa sampai ke agent.
+  ///
+  /// ⚠️ Ini BUKAN berarti "tidak ada sesi". Dua hal itu terpisah, dan
+  /// menganggapnya sama punya biaya nyata: setelah mati listrik total,
+  /// `Session` di database tetap `BERJALAN` sementara agent PC-nya masih
+  /// mati — jadi PC tampil `OFFLINE` **dan** hitung mundurnya tetap jalan.
+  ///
+  /// Karena itu `canOperate` tidak boleh dipakai sebagai syarat untuk
+  /// mengakhiri sesi. Menghentikan sesi adalah operasi sisi server, tidak
+  /// butuh PC hidup. Lihat pemakaiannya di `pc_card.dart`.
   bool get canOperate => this != PcStatus.offline;
 
   static PcStatus fromWire(String? value) {
